@@ -50,9 +50,9 @@ namespace DYTA.Math
             {
                 var min = new Vector2Int(Position);
                 if (Width < 0)
-                    min.X += Width;
+                    min.X += Width + 1;
                 if (Height < 0)
-                    min.Y += Height;
+                    min.Y += Height + 1;
                 return min;
             }
         }
@@ -63,9 +63,9 @@ namespace DYTA.Math
             {
                 var min = new Vector2Int(Position);
                 if (Width > 0)
-                    min.X += Width;
+                    min.X += Width - 1;
                 if (Height > 0)
-                    min.Y += Height;
+                    min.Y += Height - 1;
                 return min;
             }
         }
@@ -75,6 +75,14 @@ namespace DYTA.Math
             get
             {
                 return Position + new Vector2Int(Width / 2, Height / 2);
+            }
+        }
+
+        public PositionEnumerator AllPositionsWithin
+        {
+            get
+            {
+                return new PositionEnumerator(Min, Max);
             }
         }
 
@@ -100,11 +108,6 @@ namespace DYTA.Math
         {
             return point.X >= Min.X && point.X <= Max.X &&
                 point.Y >= Min.Y && point.Y <= Max.Y;
-        }
-
-        public PositionEnumerator AllPositionsWithin()
-        {
-            return new PositionEnumerator(Min, Max);
         }
 
         public override bool Equals(object obj)
