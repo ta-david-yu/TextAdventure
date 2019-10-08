@@ -4,10 +4,13 @@ using System.Text;
 
 namespace DYTA.Render
 {
-    class UnlitBox : UIElement
+    public class UnlitBox : UIElement
     {
-        public ConsoleColor BackgroundColor { get; set; }
+        public char UnlitCharacter { get; set; }
 
-
+        public UnlitBox()
+        {
+            UnlitCharacter = 'O';
+        }
     }
 }

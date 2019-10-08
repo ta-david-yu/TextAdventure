@@ -6,14 +6,14 @@ using DYTA.Math;
 
 namespace DYTA.Render
 {
-    public abstract class Canvas
+    public abstract class Canvas : UIComponent
     {
-        public RectInt CanvasBounds { get; set; }
-
-        // draw on the cmd line
-        public abstract void Render();
-
         // reset buffer value and color
         public abstract void ResetBuffer();
+
+        public override void OnAddedToNode(UINode node)
+        {
+            base.OnAddedToNode(node);
+        }
     }
 }

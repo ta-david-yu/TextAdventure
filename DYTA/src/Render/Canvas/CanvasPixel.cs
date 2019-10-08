@@ -6,8 +6,16 @@ namespace DYTA.Render
 {
     public class PixelColor
     {
-        public ConsoleColor BackgroundColor { get; set; } = ConsoleColor.Black;
-        public ConsoleColor ForegroundColor { get; set; } = ConsoleColor.White;
+        public static PixelColor DefaultColor { get { return new PixelColor(ConsoleColor.Black, ConsoleColor.White); }  }
+
+        public ConsoleColor BackgroundColor { get; private set; } = ConsoleColor.Black;
+        public ConsoleColor ForegroundColor { get; private set; } = ConsoleColor.White;
+
+        public PixelColor()
+        {
+            BackgroundColor = ConsoleColor.Black;
+            ForegroundColor = ConsoleColor.White;
+        }
 
         public PixelColor(ConsoleColor bg, ConsoleColor fg)
         {

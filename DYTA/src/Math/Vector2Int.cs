@@ -7,6 +7,9 @@ namespace DYTA.Math
 {
     public struct Vector2Int : IEquatable<Vector2Int>
     {
+        public static Vector2Int Zero { get { return new Vector2Int(0, 0); } }
+        public static Vector2Int One { get { return new Vector2Int(1, 1); } }
+
         public int X { get; set; }
         public int Y { get; set; }
 

@@ -8,16 +8,13 @@ namespace DYTA.Render
 {
     public class SingleColorCanvas : Canvas
     {
+        public PixelColor CanvasPixelColor { get; set; }
+
         private List<string> m_PixelBuffer;
-        private PixelColor m_CanvasPixelColor;
 
-        public SingleColorCanvas(RectInt rect, PixelColor monoPixelColor)
+        public SingleColorCanvas()
         {
-            CanvasBounds = rect;
-            m_PixelBuffer = new List<string>();
-            m_CanvasPixelColor = monoPixelColor;
-
-            ResetBuffer();
+            CanvasPixelColor = new PixelColor();
         }
 
         public override void Render()
@@ -25,12 +22,14 @@ namespace DYTA.Render
             var bgCol = Console.BackgroundColor;
             var frCol = Console.ForegroundColor;
 
-            Console.BackgroundColor = m_CanvasPixelColor.BackgroundColor;
-            Console.ForegroundColor = m_CanvasPixelColor.ForegroundColor;
+            Console.BackgroundColor = CanvasPixelColor.BackgroundColor;
+            Console.ForegroundColor = CanvasPixelColor.ForegroundColor;
 
-            for (int y = 0; y < CanvasBounds.Height; y++)
+            var worldPos = Node.WorldAnchor;
+
+            for (int y = 0; y < Node.Bounds.Height; y++)
             {
-                Console.SetCursorPosition(CanvasBounds.Min.X + 0, CanvasBounds.Min.Y + y);
+                Console.SetCursorPosition(worldPos.X + Node.Bounds.Min.X + 0, worldPos.Y + Node.Bounds.Min.Y + y);
                 var line = m_PixelBuffer[y];
                 Console.WriteLine(line);
             }
@@ -41,9 +40,11 @@ namespace DYTA.Render
 
         public override void ResetBuffer()
         {
-            for (int y = 0; y < CanvasBounds.Height; y++)
+            m_PixelBuffer = new List<string>();
+
+            for (int y = 0; y < Node.Bounds.Height; y++)
             {
-                var line = new string(' ', CanvasBounds.Width);
+                var line = new string(' ', Node.Bounds.Width);
                 m_PixelBuffer.Add(line);
             }
         }

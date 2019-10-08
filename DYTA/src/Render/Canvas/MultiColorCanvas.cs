@@ -10,15 +10,11 @@ namespace DYTA.Render
     {
         private Utility.DenseArray<CanvasPixel> m_PixelBuffer;
 
-        private PixelColor m_ClearPixelColor;
+        public PixelColor ClearPixelColor { get; set; }
 
-        public MultiColorCanvas(RectInt rect, PixelColor clearColor)
+        public MultiColorCanvas()
         {
-            CanvasBounds = rect;
-            m_PixelBuffer = new Utility.DenseArray<CanvasPixel>(rect.Width, rect.Height);
-            m_ClearPixelColor = clearColor;
-
-            ResetBuffer();
+            ClearPixelColor = new PixelColor();
         }
 
         public override void Render()
@@ -26,10 +22,10 @@ namespace DYTA.Render
             var bgCol = Console.BackgroundColor;
             var frCol = Console.ForegroundColor;
 
-            for (int y = 0; y < CanvasBounds.Height; y++)
+            for (int y = 0; y < Node.Bounds.Height; y++)
             {
-                Console.SetCursorPosition(CanvasBounds.Min.X + 0, CanvasBounds.Min.Y + y);
-                for (int x = 0; x < CanvasBounds.Width; x++)
+                Console.SetCursorPosition(Node.Bounds.Min.X + 0, Node.Bounds.Min.Y + y);
+                for (int x = 0; x < Node.Bounds.Width; x++)
                 {
                     var pixel = m_PixelBuffer[x, y];
                     Console.BackgroundColor = pixel.PixelColor.BackgroundColor;
@@ -44,10 +40,12 @@ namespace DYTA.Render
 
         public override void ResetBuffer()
         {
-            foreach (var pt in CanvasBounds.AllPositionsWithin)
+            m_PixelBuffer = new Utility.DenseArray<CanvasPixel>(Node.Bounds.Width, Node.Bounds.Height);
+
+            foreach (var pt in Node.Bounds.AllPositionsWithin)
             {
-                m_PixelBuffer[pt.X - CanvasBounds.Min.X, pt.Y - CanvasBounds.Min.Y] =
-                    new CanvasPixel(' ', m_ClearPixelColor.BackgroundColor, m_ClearPixelColor.ForegroundColor);
+                m_PixelBuffer[pt.X - Node.Bounds.Min.X, pt.Y - Node.Bounds.Min.Y] =
+                    new CanvasPixel(' ', ClearPixelColor.BackgroundColor, ClearPixelColor.ForegroundColor);
             }
         }
     }
