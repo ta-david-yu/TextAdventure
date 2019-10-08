@@ -10,7 +10,12 @@ namespace DYTA.Render
 
         public UnlitBox()
         {
-            UnlitCharacter = 'O';
+            UnlitCharacter = ' ';
+        }
+
+        public override void PreRender()
+        {
+
         }
     }
 }
