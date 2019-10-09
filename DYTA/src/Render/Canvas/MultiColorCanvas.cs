@@ -48,5 +48,10 @@ namespace DYTA.Render
                     new CanvasPixel(' ', ClearPixelColor.BackgroundColor, ClearPixelColor.ForegroundColor);
             }
         }
+
+        public override void SetPixel(char character, Vector2Int pos)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

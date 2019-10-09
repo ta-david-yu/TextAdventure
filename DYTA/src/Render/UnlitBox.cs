@@ -10,12 +10,15 @@ namespace DYTA.Render
 
         public UnlitBox()
         {
-            UnlitCharacter = ' ';
+            UnlitCharacter = 'O';
         }
 
         public override void PreRender()
         {
-
+            foreach (var pos in Node.Bounds.AllPositionsWithin)
+            {
+                MainCanvas.SetPixel(UnlitCharacter, pos);
+            }
         }
     }
 }

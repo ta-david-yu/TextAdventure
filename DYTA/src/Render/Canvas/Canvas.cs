@@ -15,5 +15,7 @@ namespace DYTA.Render
         {
             base.OnAddedToNode(node);
         }
+
+        public abstract void SetPixel(char character, Vector2Int pos);
     }
 }

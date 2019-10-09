@@ -10,7 +10,7 @@ namespace DYTA.Render
     {
         public PixelColor CanvasPixelColor { get; set; }
 
-        private List<string> m_PixelBuffer;
+        private List<StringBuilder> m_PixelBuffer;
 
         public SingleColorCanvas()
         {
@@ -40,12 +40,25 @@ namespace DYTA.Render
 
         public override void ResetBuffer()
         {
-            m_PixelBuffer = new List<string>();
+            m_PixelBuffer = new List<StringBuilder>();
 
             for (int y = 0; y < Node.Bounds.Height; y++)
             {
-                var line = new string(' ', Node.Bounds.Width);
+                var str = new string(' ', Node.Bounds.Width);
+                var line = new StringBuilder(str);
                 m_PixelBuffer.Add(line);
+            }
+        }
+
+        public override void SetPixel(char character, Vector2Int pos)
+        {
+            var bounds = Node.Bounds;
+            var worldPos = bounds.Position + pos;
+
+            bool insideCanvas = bounds.Contains(worldPos);
+            if (insideCanvas)
+            {
+                m_PixelBuffer[pos.Y][pos.X] = character;
             }
         }
     }

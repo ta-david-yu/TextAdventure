@@ -25,57 +25,122 @@ namespace DYTA
             var canvas = bitmapNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
             canvas.ResetBuffer();
-            
+
+            var testBoxNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(0, 0, 5, 5), bitmapNode);
+            var box = testBoxNode.AddUIComponent<UnlitBox>();
+
             var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(22, 1, 40, 40));
             canvas = textNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
             canvas.ResetBuffer();
 
-            UINode.Engine.Instance.PreRenderNodes();
-            UINode.Engine.Instance.RenderNodes();
+            #region Audio
+            Audio.AudioManager.Instance.Begin();
 
-            /*
-            #region SMB
-            Console.Beep(659, 125); Console.Beep(659, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(523, 125); Console.Beep(659, 125); Thread.Sleep(125); Console.Beep(784, 125); Thread.Sleep(375); Console.Beep(392, 125); Thread.Sleep(375); Console.Beep(523, 125); Thread.Sleep(250); Console.Beep(392, 125); Thread.Sleep(250); Console.Beep(330, 125); Thread.Sleep(250); Console.Beep(440, 125); Thread.Sleep(125); Console.Beep(494, 125); Thread.Sleep(125); Console.Beep(466, 125); Thread.Sleep(42); Console.Beep(440, 125); Thread.Sleep(125); Console.Beep(392, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(125); Console.Beep(784, 125); Thread.Sleep(125); Console.Beep(880, 125); Thread.Sleep(125); Console.Beep(698, 125); Console.Beep(784, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(125); Console.Beep(523, 125); Thread.Sleep(125); Console.Beep(587, 125); Console.Beep(494, 125); Thread.Sleep(125); Console.Beep(523, 125); Thread.Sleep(250); Console.Beep(392, 125); Thread.Sleep(250); Console.Beep(330, 125); Thread.Sleep(250); Console.Beep(440, 125); Thread.Sleep(125); Console.Beep(494, 125); Thread.Sleep(125); Console.Beep(466, 125); Thread.Sleep(42); Console.Beep(440, 125); Thread.Sleep(125); Console.Beep(392, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(125); Console.Beep(784, 125); Thread.Sleep(125); Console.Beep(880, 125); Thread.Sleep(125); Console.Beep(698, 125); Console.Beep(784, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(125); Console.Beep(523, 125); Thread.Sleep(125); Console.Beep(587, 125); Console.Beep(494, 125); Thread.Sleep(375); Console.Beep(784, 125); Console.Beep(740, 125); Console.Beep(698, 125); Thread.Sleep(42); Console.Beep(622, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(415, 125); Console.Beep(440, 125); Console.Beep(523, 125); Thread.Sleep(125); Console.Beep(440, 125); Console.Beep(523, 125); Console.Beep(587, 125); Thread.Sleep(250); Console.Beep(784, 125); Console.Beep(740, 125); Console.Beep(698, 125); Thread.Sleep(42); Console.Beep(622, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(698, 125); Thread.Sleep(125); Console.Beep(698, 125); Console.Beep(698, 125); Thread.Sleep(625); Console.Beep(784, 125); Console.Beep(740, 125); Console.Beep(698, 125); Thread.Sleep(42); Console.Beep(622, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(415, 125); Console.Beep(440, 125); Console.Beep(523, 125); Thread.Sleep(125); Console.Beep(440, 125); Console.Beep(523, 125); Console.Beep(587, 125); Thread.Sleep(250); Console.Beep(622, 125); Thread.Sleep(250); Console.Beep(587, 125); Thread.Sleep(250); Console.Beep(523, 125); Thread.Sleep(1125); Console.Beep(784, 125); Console.Beep(740, 125); Console.Beep(698, 125); Thread.Sleep(42); Console.Beep(622, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(415, 125); Console.Beep(440, 125); Console.Beep(523, 125); Thread.Sleep(125); Console.Beep(440, 125); Console.Beep(523, 125); Console.Beep(587, 125); Thread.Sleep(250); Console.Beep(784, 125); Console.Beep(740, 125); Console.Beep(698, 125); Thread.Sleep(42); Console.Beep(622, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(698, 125); Thread.Sleep(125); Console.Beep(698, 125); Console.Beep(698, 125); Thread.Sleep(625); Console.Beep(784, 125); Console.Beep(740, 125); Console.Beep(698, 125); Thread.Sleep(42); Console.Beep(622, 125); Thread.Sleep(125); Console.Beep(659, 125); Thread.Sleep(167); Console.Beep(415, 125); Console.Beep(440, 125); Console.Beep(523, 125); Thread.Sleep(125); Console.Beep(440, 125); Console.Beep(523, 125); Console.Beep(587, 125); Thread.Sleep(250); Console.Beep(622, 125); Thread.Sleep(250); Console.Beep(587, 125); Thread.Sleep(250); Console.Beep(523, 125);
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(523, 200); // DO
+            Audio.AudioManager.Instance.Beep(523, 600); // DO
+            Audio.AudioManager.Instance.Beep(523, 200); // DO
+            Audio.AudioManager.Instance.Beep(587, 600); // RE
+            Audio.AudioManager.Instance.Beep(523, 200); // DO
+            Audio.AudioManager.Instance.Beep(494, 600); // SI
+
+            Audio.AudioManager.Instance.Sleep(1200);
+
+            Audio.AudioManager.Instance.Beep(440, 800); // LA
+            Audio.AudioManager.Instance.Beep(392, 800); // SO
+            Audio.AudioManager.Instance.Beep(523, 800); // DO
+
+            Audio.AudioManager.Instance.Sleep(100);
+
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(523, 200); // DO
+            Audio.AudioManager.Instance.Beep(523, 600); // DO 
+            Audio.AudioManager.Instance.Beep(523, 200); // DO
+            Audio.AudioManager.Instance.Beep(587, 600); // RE
+            Audio.AudioManager.Instance.Beep(523, 200); // DO
+            Audio.AudioManager.Instance.Beep(494, 600); // SI
+
+            Audio.AudioManager.Instance.Sleep(4000);
+
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(587, 200); // RE
+            Audio.AudioManager.Instance.Beep(587, 1200); // RE
+
+            Thread.Sleep(800);
+
+            // Elevate
+            int initial = 300;
+            int increment = 25;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 400); // RE
+            initial += increment;
+            Audio.AudioManager.Instance.Beep(initial, 3200); // RE
+
+            Audio.AudioManager.Instance.Sleep(800);
+
+            Audio.AudioManager.Instance.Beep(392, 200); // SO
+            Audio.AudioManager.Instance.Beep(392, 600); // SO
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(698, 400); // FA
+            Audio.AudioManager.Instance.Beep(659, 400); // MI
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(494, 600); // SI
+
+            Audio.AudioManager.Instance.Sleep(800);
+
+            Audio.AudioManager.Instance.Beep(494, 400); // SI
+            Audio.AudioManager.Instance.Beep(659, 400); // MI
+            Audio.AudioManager.Instance.Beep(587, 400); // RE
+            Audio.AudioManager.Instance.Beep(523, 400); // DO
+            Audio.AudioManager.Instance.Beep(494, 400); // SI
+            Audio.AudioManager.Instance.Beep(523, 600); // DO
+            Audio.AudioManager.Instance.Beep(587, 200); // RE
+            Audio.AudioManager.Instance.Beep(440, 600); // LA
+
+            // .. and the papers want to know whose shirts you wear
+
+            Audio.AudioManager.Instance.Begin();
             #endregion
-            */
-            Console.Beep(523, 400); // DO
-            Console.Beep(523, 200); // DO
-            Console.Beep(523, 600); // DO
-            Console.Beep(523, 200); // DO
-            Console.Beep(587, 600); // RE
-            Console.Beep(523, 200); // DO
-            Console.Beep(494, 600); // SI
 
-            Thread.Sleep(1200);
 
-            Console.Beep(440, 800); // LA
-            Console.Beep(392, 800); // SO
-            Console.Beep(523, 800); // DO
+            while (true)
+            {
+                UINode.Engine.Instance.PreRenderNodes();
+                UINode.Engine.Instance.RenderNodes();
 
-            Thread.Sleep(100);
+                var pos = testBoxNode.Bounds.Position;
+                pos += new Math.Vector2Int(1, 3);
+                testBoxNode.SetPosition(pos);
 
-            Console.Beep(523, 400); // DO
-            Console.Beep(523, 200); // DO
-            Console.Beep(523, 600); // DO 
-            Console.Beep(523, 200); // DO
-            Console.Beep(587, 600); // RE
-            Console.Beep(523, 200); // DO
-            Console.Beep(494, 600); // SI
+                Thread.Sleep(200);
+            }
 
-            Thread.Sleep(3600);
 
-            Console.Beep(523, 400); // DO
-            Console.Beep(587, 400); // RE
-            Console.Beep(523, 400); // DO
-            Console.Beep(587, 400); // RE
-            Console.Beep(523, 400); // DO
-            Console.Beep(587, 400); // RE
-            Console.Beep(523, 400); // DO
-            Console.Beep(587, 400); // RE
-            Console.Beep(523, 400); // DO
-            Console.Beep(587, 200); // RE
-            Console.Beep(587, 600); // RE
+            Audio.AudioManager.Instance.End();
         }
     }
 }
