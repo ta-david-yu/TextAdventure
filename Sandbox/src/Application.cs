@@ -1,41 +1,94 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Diagnostics;
+
 using DYTA.Render;
 
 namespace DYTA
 {
     class Application
     {
+        TextBox m_DebugTxt;
+
         static void Main(string[] args)
         {
             var app = new Application();
+            app.playBgm();
+            app.setupMainMenu();
             app.run();
+        }
+
+        void setupMainMenu()
+        {
+            UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 65, 44), PixelColor.DefaultColor);
+
+            var rootNode = UINode.Engine.Instance.RootNode;
+            var rootCanvas = rootNode.GetUIComponent<SingleColorCanvas>();
+            rootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Gray);
+
+            ////
+            var bitmapNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(2, 2, 22, 40));
+            var canvas = bitmapNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+
+            //// 
+            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 37, 40));
+            canvas = textNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Gray, ConsoleColor.Black);
+            canvas.ResetBuffer();
+
+            //
+            var testBoxNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 1, 9, 1), textNode);
+            var box = testBoxNode.AddUIComponent<UnlitBox>();
+
+            //
+            var testBoxNode2 = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 2, 9, 1), textNode);
+
+            var box2 = testBoxNode2.AddUIComponent<TextBox>();
+            box2.text = new System.Text.StringBuilder("DAVID");
+            box2.horizontalAlignment = TextBox.HorizontalAlignment.Right;
+
+            //// 
+            var debugNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(0, 43, 65, 1), rootNode);
+            m_DebugTxt = debugNode.AddUIComponent<TextBox>();
+            m_DebugTxt.horizontalAlignment = TextBox.HorizontalAlignment.Left;
         }
 
         void run()
         {
-            UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 63, 42), PixelColor.DefaultColor);
+            long minimumStepPerFrame = 200;
 
-            var rootNode = UINode.Engine.Instance.RootNode;
-            var rootCanvas = rootNode.GetUIComponent<SingleColorCanvas>();
-            rootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Gray);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            var bitmapNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 1, 20, 40));
-            var canvas = bitmapNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
-            canvas.ResetBuffer();
+            long timeStep = minimumStepPerFrame;
+            while (true)
+            {
+                UINode.Engine.Instance.PreRenderNodes();
+                UINode.Engine.Instance.RenderNodes();
+                m_DebugTxt.text.Clear();
+                m_DebugTxt.text.Append("FRAME TIME ELAPSE - " + timeStep);
+                m_DebugTxt.Node.Translate(new Math.Vector2Int(1, 0));
 
-            var testBoxNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(0, 0, 5, 5), bitmapNode);
-            var box = testBoxNode.AddUIComponent<UnlitBox>();
+                // Do Something 
 
-            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(22, 1, 40, 40));
-            canvas = textNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
-            canvas.ResetBuffer();
+                timeStep = stopwatch.ElapsedMilliseconds;
 
+                if (timeStep < minimumStepPerFrame)
+                {
+                    int sleep = (int)(minimumStepPerFrame - timeStep);
+                    Thread.Sleep(sleep);
+                    timeStep = minimumStepPerFrame;
+                }
+
+                stopwatch.Restart();
+            }
+        }
+
+        void playBgm()
+        {
             #region Audio
-            Audio.AudioManager.Instance.Begin();
 
             Audio.AudioManager.Instance.Beep(523, 400); // DO
             Audio.AudioManager.Instance.Beep(523, 200); // DO
@@ -75,7 +128,7 @@ namespace DYTA
             Audio.AudioManager.Instance.Beep(587, 200); // RE
             Audio.AudioManager.Instance.Beep(587, 1200); // RE
 
-            Thread.Sleep(800);
+            Audio.AudioManager.Instance.Sleep(800);
 
             // Elevate
             int initial = 300;
@@ -125,22 +178,6 @@ namespace DYTA
 
             Audio.AudioManager.Instance.Begin();
             #endregion
-
-
-            while (true)
-            {
-                UINode.Engine.Instance.PreRenderNodes();
-                UINode.Engine.Instance.RenderNodes();
-
-                var pos = testBoxNode.Bounds.Position;
-                pos += new Math.Vector2Int(1, 3);
-                testBoxNode.SetPosition(pos);
-
-                Thread.Sleep(200);
-            }
-
-
-            Audio.AudioManager.Instance.End();
         }
     }
 }

@@ -13,9 +13,9 @@ namespace DYTA.Render
 
         }
 
-        public override void OnAddedToNode(UINode node)
+        public override void OnInitializedByNode(UINode node)
         {
-            base.OnAddedToNode(node);
+            base.OnInitializedByNode(node);
 
             var currNode = node;
             var canvas = currNode.GetUIComponent<Canvas>();

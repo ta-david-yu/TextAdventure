@@ -10,12 +10,13 @@ namespace DYTA.Render
 
         public Canvas ParentCanvas { get; private set; }
 
+
         public virtual void PreRender() { }
 
         // draw on the cmd line
         public virtual void Render() { }
 
-        public virtual void OnAddedToNode(UINode node)
+        public virtual void OnInitializedByNode(UINode node)
         {
             Node = node;
         }

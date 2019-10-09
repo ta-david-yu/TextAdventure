@@ -13,16 +13,21 @@ namespace DYTA.Audio
             public int Duration;
         }
 
+        private static readonly object s_Lock = new object();
+
         private static AudioManager s_Instance = null;
         public static AudioManager Instance
         {
             get
             {
-                if (s_Instance == null)
+                lock (s_Lock)
                 {
-                    s_Instance = new AudioManager();
+                    if (s_Instance == null)
+                    {
+                        s_Instance = new AudioManager();
+                    }
+                    return s_Instance;
                 }
-                return s_Instance;
             }
         }
 
@@ -39,24 +44,28 @@ namespace DYTA.Audio
 
         public void Begin()
         {
-            m_Thread = new System.Threading.Thread(() =>
+            if (m_Thread == null)
             {
-                // DO SOMETHING
-                while (m_IsPlaying)
+                m_Thread = new System.Threading.Thread(() =>
                 {
-                    if (m_UnitQueue.Count > 0)
+                    // DO SOMETHING
+                    while (m_IsPlaying)
                     {
-                        var unit = m_UnitQueue.Dequeue();
-                        if (!unit.IsMute)
-                            Console.Beep(unit.Frequency, unit.Duration);
-                        else
-                            System.Threading.Thread.Sleep(unit.Duration);
+                        if (m_UnitQueue.Count > 0)
+                        {
+                            var unit = m_UnitQueue.Dequeue();
+
+                            if (!unit.IsMute)
+                                Console.Beep(unit.Frequency, unit.Duration);
+                            else
+                                System.Threading.Thread.Sleep(unit.Duration);
+                        }
                     }
-                }
-            });
-            m_Thread.IsBackground = true;
+                });
+                m_Thread.IsBackground = true;
+                m_Thread.Start();
+            }
             m_IsPlaying = true;
-            m_Thread.Start();
         }
 
         public void End()
@@ -67,7 +76,7 @@ namespace DYTA.Audio
         public void Beep(int fre, int dur)
         {
             BeepUnit unit = new BeepUnit();
-            unit.Frequency = fre; unit.Duration = dur;
+            unit.Frequency = fre; unit.Duration = (int)(dur);
             m_UnitQueue.Enqueue(unit);
         }
 
@@ -75,7 +84,7 @@ namespace DYTA.Audio
         {
             BeepUnit unit = new BeepUnit();
             unit.IsMute = true;
-            unit.Duration = dur;
+            unit.Duration = (int)(dur);
             m_UnitQueue.Enqueue(unit);
         }
     }

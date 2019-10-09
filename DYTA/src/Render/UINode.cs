@@ -24,16 +24,21 @@ namespace DYTA.Render
                 }
             }
 
+            private static readonly object s_Lock = new object();
+
             private static Engine s_Instance = null;
             public static Engine Instance
             {
                 get
                 {
-                    if (s_Instance == null)
+                    lock (s_Lock)
                     {
-                        Console.WriteLine("Error - need an instance as Singleton");
+                        if (s_Instance == null)
+                        {
+                            Console.WriteLine("Error - need an instance as Singleton");
+                        }
+                        return s_Instance;
                     }
-                    return s_Instance;
                 }
             }
 
@@ -55,7 +60,6 @@ namespace DYTA.Render
 
                 RootCanvas = RootNode.AddUIComponent<SingleColorCanvas>();
                 RootCanvas.CanvasPixelColor = color;
-                RootCanvas.ResetBuffer();
             }
 
             public UINode CreateNode(Math.RectInt nodeBounds, UINode parent = null)
@@ -185,6 +189,11 @@ namespace DYTA.Render
             Bounds = new RectInt(Bounds.Position, size);
         }
 
+        public void Translate(Vector2Int offset)
+        {
+            Bounds = new RectInt(Bounds.Position + offset, Bounds.Size);
+        }
+
         public void SetParent(UINode node)
         {
             if (node == null)
@@ -199,7 +208,7 @@ namespace DYTA.Render
         public T AddUIComponent<T>() where T : UIComponent, new()
         {
             T instance = new T();
-            instance.OnAddedToNode(this);
+            instance.OnInitializedByNode(this);
             m_UIComponents.Add(instance);
             return instance;
         }

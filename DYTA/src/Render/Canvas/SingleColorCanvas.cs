@@ -8,13 +8,33 @@ namespace DYTA.Render
 {
     public class SingleColorCanvas : Canvas
     {
-        public PixelColor CanvasPixelColor { get; set; }
+        private PixelColor m_CanvasPixelColor = new PixelColor();
+        public PixelColor CanvasPixelColor 
+        { 
+            get
+            {
+                return m_CanvasPixelColor;
+            }
+
+            set
+            {
+                m_CanvasPixelColor = value;
+                ResetBuffer();
+            }
+        }
 
         private List<StringBuilder> m_PixelBuffer;
 
+        private string m_ClearLine;
+
         public SingleColorCanvas()
         {
-            CanvasPixelColor = new PixelColor();
+        }
+
+        public override void OnInitializedByNode(UINode node)
+        {
+            base.OnInitializedByNode(node);
+            ResetBuffer();
         }
 
         public override void Render()
@@ -36,17 +56,31 @@ namespace DYTA.Render
 
             Console.BackgroundColor = bgCol;
             Console.ForegroundColor = frCol;
+
+            ResetBuffer();
         }
 
         public override void ResetBuffer()
         {
-            m_PixelBuffer = new List<StringBuilder>();
-
-            for (int y = 0; y < Node.Bounds.Height; y++)
+            if (m_ClearLine == null)
             {
-                var str = new string(' ', Node.Bounds.Width);
-                var line = new StringBuilder(str);
-                m_PixelBuffer.Add(line);
+                m_ClearLine = new string(' ', Node.Bounds.Width);
+            }
+
+            if (m_PixelBuffer == null)
+            {
+                m_PixelBuffer = new List<StringBuilder>();
+                for (int y = 0; y < Node.Bounds.Height; y++)
+                {
+                    m_PixelBuffer.Add(new StringBuilder(m_ClearLine));
+                }
+            }
+            else
+            {
+                for (int y = 0; y < Node.Bounds.Height; y++)
+                {
+                    m_PixelBuffer[y] = new StringBuilder(m_ClearLine);
+                }
             }
         }
 
