@@ -16,6 +16,10 @@ namespace DYTA.Render
         // draw on the cmd line
         public virtual void Render() { }
 
+        public virtual void OnNodeSizeChanged(Math.Vector2Int size) { }
+
+        public virtual void OnNodePositionChanged(Math.Vector2Int pos) { }
+
         public virtual void OnInitializedByNode(UINode node)
         {
             Node = node;

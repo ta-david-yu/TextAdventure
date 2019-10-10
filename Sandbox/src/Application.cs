@@ -30,7 +30,7 @@ namespace DYTA
 
         void setupMainMenu()
         {
-            UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 65, 34), PixelColor.DefaultColor);
+            UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 95, 34), PixelColor.DefaultColor);
 
             var rootNode = UINode.Engine.Instance.RootNode;
             var rootCanvas = rootNode.GetUIComponent<SingleColorCanvas>();
@@ -42,10 +42,9 @@ namespace DYTA
             bitmap.LoadFromFile("./Assets/ShuttleScene.txt");
 
             //// 
-            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 37, 30));
+            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 67, 30));
             var canvas = textNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
-            canvas.ResetBuffer();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
 
             //
             var testBoxNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 1, 9, 1), textNode);
