@@ -11,13 +11,17 @@ namespace Sandbox
 {
     public class TextAdventureApp : ApplicationBase
     {
-        TextBox m_NameTxt;
+        private TextBox m_NameTxt;
+
+        public TextAdventureApp(RectInt bounds, PixelColor color) : base(bounds, color)
+        {
+        }
 
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
         {
             if (keyInfo.Key == ConsoleKey.Escape)
             {
-                IsRunning = false;
+                UINode.Engine.Instance.CleanUp();
             }
             else
             {
@@ -43,9 +47,6 @@ namespace Sandbox
         protected override void initialSetup()
         {
             playBgm();
-
-            UINode.Engine.CreateSingleton(new RectInt(0, 0, 95, 34), PixelColor.DefaultColor);
-            UINode.Engine.Instance.RootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
 
             ////
             var bitmapNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 2, 22, 30), null, "Bitmap");

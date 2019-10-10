@@ -10,6 +10,11 @@ namespace DYTA
     {
         public bool IsRunning { get; protected set; } = false;
 
+        public ApplicationBase(Math.RectInt bounds, PixelColor color)
+        {
+            UINode.Engine.CreateSingleton(bounds, color);
+        }
+
         public void Run()
         {
             registerGlobalEvent();
@@ -55,6 +60,12 @@ namespace DYTA
                 UINode.Engine.Instance.PreRenderNodes();
                 UINode.Engine.Instance.RenderNodes();
 
+                // rendering destruction
+                if (UINode.Engine.Instance.IsDelayedCleanup)
+                {
+                    UINode.Engine.Instance.Destruction();
+                }
+
                 // logging
                 FrameLogger.Update();
 
@@ -82,6 +93,5 @@ namespace DYTA
         protected abstract void logicUpdate(long timeStep);
 
         protected abstract void handleOnKeyPressed(ConsoleKeyInfo keyInfo);
-
     }
 }

@@ -46,10 +46,11 @@ namespace DYTA.Render
             {
                 s_Instance = new Engine(bounds, color);
 
-                Math.RectInt bound = new RectInt(bounds.Max, new Vector2Int(120, 15));
+                RectInt bound = new RectInt(bounds.Max, new Vector2Int(120, 15));
                 FrameLogger.CreateSingleton(bound);
             }
 
+            public bool IsDelayedCleanup { get; private set; } = false;
             private int m_NodeIdCounter = 0;
 
             public UINode RootNode { get; private set; }
@@ -58,8 +59,13 @@ namespace DYTA.Render
 
             private Engine(Math.RectInt mainBounds, PixelColor color)
             {
+                init(mainBounds, color);
+            }
+
+            private void init(Math.RectInt mainBounds, PixelColor color)
+            {
                 RootNode = new UINode(m_NodeIdCounter, mainBounds, "Root");
-                m_NodeIdCounter += 1;
+                m_NodeIdCounter = 0;
 
                 RootCanvas = RootNode.AddUIComponent<SingleColorCanvas>();
                 RootCanvas.CanvasPixelColor = color;
@@ -84,6 +90,7 @@ namespace DYTA.Render
                 }
             }
 
+            // Nodes with Dirty ParentCanvas are pre-rendered again
             public void PreRenderNodes()
             {
                 int index = 0;
@@ -101,36 +108,11 @@ namespace DYTA.Render
                     }
                     index++;
                 }
-
-                /*
-                Stack<UINode> nodeStack = new Stack<UINode>();
-                nodeStack.Push(RootNode);
-
-                while (nodeStack.Count > 0)
-                {
-                    var currNode = nodeStack.Pop();
-
-                    if (currNode.IsActive)
-                    {
-                        if (currNode.ParentCanvas.Node.IsDirty)
-                        {
-                            currNode.PreRenderUIs();
-                        }
-
-                        for (int i = currNode.Children.Count - 1; i >= 0; i--)
-                        {
-                            var childNode = currNode.Children[i];
-                            nodeStack.Push(childNode);
-                        }
-                    }
-                }
-                */
             }
 
             // Nodes with Dirty ParentCanvas are rendered again
             public void RenderNodes()
             {
-
                 FrameLogger.Log("");
                 HashSet<Canvas> dirtyCanvases = new HashSet<Canvas>();
 
@@ -153,35 +135,22 @@ namespace DYTA.Render
                     index++;
                 }
 
-                /*
-                Stack<UINode> nodeStack = new Stack<UINode>();
-                nodeStack.Push(RootNode);
-
-                while (nodeStack.Count > 0)
-                {
-                    var currNode = nodeStack.Pop();
-
-                    if (currNode.IsActive)
-                    {
-                        if (currNode.ParentCanvas.Node.IsDirty)
-                        {
-                            currNode.RenderUIs();
-                            dirtyCanvasNodes.Add(currNode.ParentCanvas.Node);
-                        }
-
-                        for (int i = currNode.Children.Count - 1; i >= 0; i--)
-                        {
-                            var childNode = currNode.Children[i];
-                            nodeStack.Push(childNode);
-                        }
-                    }
-                }
-                */
-
                 foreach (var canvas in dirtyCanvases)
                 {
                     canvas.IsDirty = false;
                 }
+            }
+
+            public void Destruction()
+            {
+                init(RootNode.Bounds, RootCanvas.CanvasPixelColor);
+                IsDelayedCleanup = false;
+            }
+
+            // Clear all nodes
+            public void CleanUp()
+            {
+                IsDelayedCleanup = true;
             }
         }
         #endregion
