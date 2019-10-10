@@ -20,7 +20,28 @@ namespace DYTA.Render
             Bottom
         }
 
-        public StringBuilder text { get; set; } = new StringBuilder();
+        private string m_Text = string.Empty;
+        public string text
+        {
+            get { return m_Text; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    if (string.IsNullOrEmpty(m_Text))
+                    {
+                        return;
+                    }
+                    m_Text = "";
+                    Node.SetDirty();
+                }
+                else if (m_Text != value)
+                {
+                    m_Text = value;
+                    Node.SetDirty();
+                }
+            }
+        }
 
         public HorizontalAlignment horizontalAlignment { get; set; } = HorizontalAlignment.Left;
         public VerticalAlignment verticalAlignment { get; set; } = VerticalAlignment.Top;
@@ -74,7 +95,7 @@ namespace DYTA.Render
                 for (int j = 0; j < line.Length; j++)
                 {
                     var offset = new Math.Vector2Int(anchorX + j, anchorY + i);
-                    MainCanvas.SetPixel(line[j], Node.Bounds.Position + offset);
+                    Node.ParentCanvas.SetPixel(line[j], Node.Bounds.Position + offset);
                 }
             }
         }

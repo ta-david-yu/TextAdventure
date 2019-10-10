@@ -8,8 +8,6 @@ namespace DYTA.Render
     {
         public UINode Node { get; private set; }
 
-        public Canvas ParentCanvas { get; private set; }
-
 
         public virtual void PreRender() { }
 

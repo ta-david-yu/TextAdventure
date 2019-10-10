@@ -37,6 +37,10 @@ namespace DYTA.Render
             ResetBuffer();
         }
 
+        public override void PreRender()
+        {
+        }
+
         public override void Render()
         {
             var bgCol = Console.BackgroundColor;
@@ -56,8 +60,6 @@ namespace DYTA.Render
 
             Console.BackgroundColor = bgCol;
             Console.ForegroundColor = frCol;
-
-            ResetBuffer();
         }
 
         public override void ResetBuffer()

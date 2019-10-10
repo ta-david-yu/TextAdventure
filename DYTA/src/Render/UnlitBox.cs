@@ -17,7 +17,7 @@ namespace DYTA.Render
         {
             foreach (var pos in Node.Bounds.AllPositionsWithin)
             {
-                MainCanvas.SetPixel(UnlitCharacter, pos);
+                Node.ParentCanvas.SetPixel(UnlitCharacter, pos);
             }
         }
     }

@@ -6,7 +6,15 @@ namespace DYTA.Render
 {
     public class Bitmap : UIElement
     {
+        public enum DrawType
+        {
+            Normal,
+            Sliced
+        }
+
         public List<StringBuilder> Data { get; private set; } 
+
+        //public DrawType 
 
         public Bitmap()
         {
@@ -48,7 +56,7 @@ namespace DYTA.Render
             foreach (var pos in Node.Bounds.AllPositionsWithin)
             {
                 var dataPos = pos - Node.Bounds.Position;
-                MainCanvas.SetPixel(Data[dataPos.Y][dataPos.X], pos);
+                Node.ParentCanvas.SetPixel(Data[dataPos.Y][dataPos.X], pos);
             }
         }
     }

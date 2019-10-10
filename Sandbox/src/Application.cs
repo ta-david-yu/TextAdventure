@@ -11,11 +11,11 @@ namespace DYTA
     {
         private bool m_IsRunning = false;
 
-        TextBox m_DebugTxt;
         TextBox m_NameTxt;
 
         static void Main(string[] args)
         {
+
             var app = new Application();
 
             app.registerGlobalEvent();
@@ -31,35 +31,27 @@ namespace DYTA
         void setupMainMenu()
         {
             UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 95, 34), PixelColor.DefaultColor);
-
-            var rootNode = UINode.Engine.Instance.RootNode;
-            var rootCanvas = rootNode.GetUIComponent<SingleColorCanvas>();
-            rootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+            UINode.Engine.Instance.RootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
 
             ////
-            var bitmapNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(2, 2, 22, 30));
+            var bitmapNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(2, 2, 22, 30), null, "Bitmap");
             var bitmap = bitmapNode.AddUIComponent<Bitmap>();
             bitmap.LoadFromFile("./Assets/ShuttleScene.txt");
 
             //// 
-            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 67, 30));
-            var canvas = textNode.AddUIComponent<SingleColorCanvas>();
+            var descriptionNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 67, 30), null, "Descr-Canvas");
+            var canvas = descriptionNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
 
             //
-            var testBoxNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 1, 9, 1), textNode);
-            var box = testBoxNode.AddUIComponent<UnlitBox>();
+            var boxNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 1, 9, 1), descriptionNode, "UnlitBox");
+            var box = boxNode.AddUIComponent<UnlitBox>();
 
             //
-            var testBoxNode2 = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 2, 9, 1), textNode);
-            m_NameTxt = testBoxNode2.AddUIComponent<TextBox>();
-            m_NameTxt.text = new System.Text.StringBuilder("");
+            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 2, 9, 1), descriptionNode, "Text");
+            m_NameTxt = textNode.AddUIComponent<TextBox>();
+            m_NameTxt.text = "";//string.Empty;
             m_NameTxt.horizontalAlignment = TextBox.HorizontalAlignment.Left;
-
-            //// 
-            var debugNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(0, 43, 65, 1), rootNode);
-            m_DebugTxt = debugNode.AddUIComponent<TextBox>();
-            m_DebugTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
         }
 
         void registerGlobalEvent()
@@ -69,23 +61,27 @@ namespace DYTA
 
         void run()
         {
-            long minimumStepPerFrame = 40;
+            long minimumStepPerFrame = 20; // TODO: 40
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             long timeStep = minimumStepPerFrame;
 
+            long frameCounter = 0;
+
             m_IsRunning = true;
             while (true)
             {
-                update(timeStep);
+                string frameInfo = string.Format("FRAME: {0, -5}- TIMESTEP: {1, -5}", ++frameCounter, timeStep);
+                FrameLogger.Log(frameInfo);
 
-                m_DebugTxt.text.Length = 0;
-                m_DebugTxt.text.Append("FRAME ELAPSE - " + timeStep);
+                update(timeStep);
 
                 UINode.Engine.Instance.PreRenderNodes();
                 UINode.Engine.Instance.RenderNodes();
+
+                FrameLogger.Update();
 
                 timeStep = stopwatch.ElapsedMilliseconds;
 
@@ -102,6 +98,21 @@ namespace DYTA
                 {
                     break;
                 }
+
+                /*
+                Console.SetCursorPosition(0, UINode.Engine.Instance.RootNode.Bounds.Size.Y);
+                foreach (var node in UINode.Engine.Instance.NodeTreeTraverse)
+                {
+                    var info = string.Empty;
+                    info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
+                    info += (node.IsActive) ? "O" : "X";
+                    info += (node.Canvas != null) ? " C " : "   ";
+                    info += (node.Canvas != null && node.Canvas.IsDirty) ? " D " : "   ";
+                    info += string.Format("{0,2} {1,-15} ", node.ParentCanvas.Node.InstanceId, node.ParentCanvas.Node.Name);
+                    Console.WriteLine(info);
+                }
+                */
+                //Console.ReadLine();
             }
 
             stopwatch.Stop();
@@ -109,7 +120,7 @@ namespace DYTA
 
         void update(long timeStep)
         {
-            // TODO
+            // TODO: logic update
             Input.KeyboardListener.Instance.QueryInput();
         }
 
@@ -125,15 +136,17 @@ namespace DYTA
                 if (keyInfo.Key == ConsoleKey.Backspace)
                 {
                     if (m_NameTxt.text.Length > 0)
-                        m_NameTxt.text.Length--;
+                    {
+                        m_NameTxt.text = m_NameTxt.text.Remove(m_NameTxt.text.Length - 1);
+                    }
                 }
                 else if (keyInfo.Key == ConsoleKey.Enter)
                 {
-                    m_NameTxt.text.Append('\n');
+                    m_NameTxt.text += '\n';
                 }
                 else
                 {
-                    m_NameTxt.text.Append(keyInfo.KeyChar);
+                    m_NameTxt.text += keyInfo.KeyChar;
                 }
             }
         }

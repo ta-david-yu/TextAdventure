@@ -45,6 +45,9 @@ namespace DYTA.Render
             public static void CreateSingleton(Math.RectInt bounds, PixelColor color)
             {
                 s_Instance = new Engine(bounds, color);
+
+                Math.RectInt bound = new RectInt(bounds.Max, new Vector2Int(120, 15));
+                FrameLogger.CreateSingleton(bound);
             }
 
             private int m_NodeIdCounter = 0;
@@ -55,24 +58,51 @@ namespace DYTA.Render
 
             private Engine(Math.RectInt mainBounds, PixelColor color)
             {
-                RootNode = new UINode(m_NodeIdCounter, mainBounds);
+                RootNode = new UINode(m_NodeIdCounter, mainBounds, "Root");
                 m_NodeIdCounter += 1;
 
                 RootCanvas = RootNode.AddUIComponent<SingleColorCanvas>();
                 RootCanvas.CanvasPixelColor = color;
+
+                RootNode.ParentCanvas = RootCanvas;
             }
 
-            public UINode CreateNode(Math.RectInt nodeBounds, UINode parent = null)
+            public UINode CreateNode(Math.RectInt nodeBounds, UINode parent = null, string name = "")
             {
-                var node = new UINode(m_NodeIdCounter, nodeBounds);
+                var node = new UINode(m_NodeIdCounter, nodeBounds, name);
                 m_NodeIdCounter += 1;
 
-                node.SetParent(parent);
+                node.setParent(parent);
                 return node;
+            }
+
+            public UINodeEnumerator NodeTreeTraverse
+            {
+                get
+                {
+                    return new UINodeEnumerator(RootNode);
+                }
             }
 
             public void PreRenderNodes()
             {
+                int index = 0;
+                foreach (var node in UINode.Engine.Instance.NodeTreeTraverse)
+                {
+                    if (node.ParentCanvas.IsDirty || (node.Canvas != null && node.Canvas.IsDirty))
+                    {
+                        node.PreRenderUIs();
+
+                        var info = string.Empty;
+                        info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
+                        info += string.Format("p {0,2} {1,-15} PCD:{2}", node.ParentCanvas.Node.InstanceId, node.ParentCanvas.Node.Name, node.ParentCanvas.IsDirty);
+                        info += " - PreRenderer";
+                        FrameLogger.Log(info);
+                    }
+                    index++;
+                }
+
+                /*
                 Stack<UINode> nodeStack = new Stack<UINode>();
                 nodeStack.Push(RootNode);
 
@@ -82,7 +112,10 @@ namespace DYTA.Render
 
                     if (currNode.IsActive)
                     {
-                        currNode.PreRenderUIs();
+                        if (currNode.ParentCanvas.Node.IsDirty)
+                        {
+                            currNode.PreRenderUIs();
+                        }
 
                         for (int i = currNode.Children.Count - 1; i >= 0; i--)
                         {
@@ -91,10 +124,36 @@ namespace DYTA.Render
                         }
                     }
                 }
+                */
             }
 
+            // Nodes with Dirty ParentCanvas are rendered again
             public void RenderNodes()
             {
+
+                FrameLogger.Log("");
+                HashSet<Canvas> dirtyCanvases = new HashSet<Canvas>();
+
+                int index = 0;
+                foreach (var node in UINode.Engine.Instance.NodeTreeTraverse)
+                {
+                    if (node.ParentCanvas.IsDirty || (node.Canvas != null && node.Canvas.IsDirty))
+                    {
+                        node.RenderUIs();
+                        dirtyCanvases.Add(node.ParentCanvas);
+
+                        Console.SetCursorPosition(0, UINode.Engine.Instance.RootNode.Bounds.Size.Y + index + m_NodeIdCounter + 1);
+
+                        var info = string.Empty;
+                        info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
+                        info += string.Format("p {0,2} {1,-15} PCD:{2}", node.ParentCanvas.Node.InstanceId, node.ParentCanvas.Node.Name, node.ParentCanvas.IsDirty);
+                        info += " - Render";
+                        FrameLogger.Log(info);
+                    }
+                    index++;
+                }
+
+                /*
                 Stack<UINode> nodeStack = new Stack<UINode>();
                 nodeStack.Push(RootNode);
 
@@ -104,7 +163,11 @@ namespace DYTA.Render
 
                     if (currNode.IsActive)
                     {
-                        currNode.RenderUIs();
+                        if (currNode.ParentCanvas.Node.IsDirty)
+                        {
+                            currNode.RenderUIs();
+                            dirtyCanvasNodes.Add(currNode.ParentCanvas.Node);
+                        }
 
                         for (int i = currNode.Children.Count - 1; i >= 0; i--)
                         {
@@ -112,6 +175,12 @@ namespace DYTA.Render
                             nodeStack.Push(childNode);
                         }
                     }
+                }
+                */
+
+                foreach (var canvas in dirtyCanvases)
+                {
+                    canvas.IsDirty = false;
                 }
             }
         }
@@ -119,9 +188,10 @@ namespace DYTA.Render
 
         public int InstanceId { get; private set; } = -1;
 
+        public string Name { get; private set; } = string.Empty;
 
         private UINode m_Parent;
-        public UINode Parent 
+        public UINode Parent
         {
             get
             {
@@ -141,10 +211,31 @@ namespace DYTA.Render
                     return m_Parent;
                 }
             }
+
+            private set
+            {
+                m_Parent = value;
+            }
         }
 
-        public Vector2Int WorldAnchor 
-        { 
+        public Canvas Canvas { get; private set; }
+
+        private Canvas m_ParentCanvas;
+        public Canvas ParentCanvas
+        {
+            get
+            {
+                return m_ParentCanvas;
+            }
+
+            private set
+            {
+                m_ParentCanvas = value;
+            }
+        }
+
+        public Vector2Int WorldAnchor
+        {
             get
             {
                 Vector2Int pos = Vector2Int.Zero;
@@ -168,36 +259,28 @@ namespace DYTA.Render
         private List<UIComponent> m_UIComponents = new List<UIComponent>();
         public ReadOnlyCollection<UIComponent> UIComponents => m_UIComponents.AsReadOnly();
 
-        private UINode(int id, RectInt bound)
+        private UINode(int id, RectInt bound, string name)
         {
             InstanceId = id;
             Bounds = bound;
+            Name = name;
         }
 
         public void SetPosition(Vector2Int pos)
         {
             Bounds = new RectInt(pos, Bounds.Size);
+            SetDirty();
         }
 
         public void SetSize(Vector2Int size)
         {
             Bounds = new RectInt(Bounds.Position, size);
+            SetDirty();
         }
 
         public void Translate(Vector2Int offset)
         {
-            Bounds = new RectInt(Bounds.Position + offset, Bounds.Size);
-        }
-
-        public void SetParent(UINode node)
-        {
-            if (node == null)
-            {
-                node = Engine.Instance.RootNode;
-            }
-
-            m_Parent = node;
-            m_Parent.m_Children.Add(this);
+            SetPosition(Bounds.Position + offset);
         }
 
         public T AddUIComponent<T>() where T : UIComponent, new()
@@ -205,6 +288,13 @@ namespace DYTA.Render
             T instance = new T();
             instance.OnInitializedByNode(this);
             m_UIComponents.Add(instance);
+
+            var canvas = instance as Canvas;
+            if (canvas != null)
+            {
+                Canvas = canvas as Canvas;
+            }
+
             return instance;
         }
 
@@ -227,6 +317,7 @@ namespace DYTA.Render
                 var ui = UIComponents[i];
                 ui.PreRender();
             }
+
         }
 
         public void RenderUIs()
@@ -236,11 +327,34 @@ namespace DYTA.Render
                 var ui = UIComponents[i];
                 ui.Render();
             }
+        }
 
-            /*
-            Console.SetCursorPosition(0, 25);
-            Console.WriteLine(InstanceId);
-            */
+        // set position, set size
+        public void SetDirty()
+        {
+            // ParentCanvas has to be set Dirty
+            ParentCanvas.IsDirty = true;
+        }
+
+        private void setParent(UINode node)
+        {
+            if (node == null)
+            {
+                node = Engine.Instance.RootNode;
+            }
+
+            Parent = node;
+            Parent.m_Children.Add(this);
+
+            // setParentCanvas
+            if (Parent.Canvas != null)
+            {
+                ParentCanvas = Parent.Canvas;
+            }
+            else
+            {
+                ParentCanvas = Parent.ParentCanvas;
+            }
         }
     }
 }
