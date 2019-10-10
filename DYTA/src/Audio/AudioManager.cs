@@ -37,6 +37,8 @@ namespace DYTA.Audio
 
         private bool m_IsPlaying = false;
 
+        public event Action OnQueueEmptied = delegate { };
+
         public AudioManager()
         {
 
@@ -48,7 +50,6 @@ namespace DYTA.Audio
             {
                 m_Thread = new System.Threading.Thread(() =>
                 {
-                    // DO SOMETHING
                     while (m_IsPlaying)
                     {
                         if (m_UnitQueue.Count > 0)
@@ -59,6 +60,11 @@ namespace DYTA.Audio
                                 Console.Beep(unit.Frequency, unit.Duration);
                             else
                                 System.Threading.Thread.Sleep(unit.Duration);
+
+                            if (m_UnitQueue.Count == 0)
+                            {
+                                OnQueueEmptied.Invoke();
+                            }
                         }
                     }
                 });

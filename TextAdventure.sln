@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DYTA", "DYTA\DYTA.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{DC69C619-9CF5-40D8-97F0-C9EFFC3E2A23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DYTATests", "DYTATests\DYTATests.csproj", "{7C702861-6765-48C7-B419-22CECFF2084A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DYTATests", "DYTATests\DYTATests.csproj", "{7C702861-6765-48C7-B419-22CECFF2084A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

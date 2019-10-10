@@ -31,7 +31,7 @@ namespace DYTA.Render
             {
                 get
                 {
-                    lock (s_Lock)
+                    //lock (s_Lock)
                     {
                         if (s_Instance == null)
                         {
@@ -172,11 +172,6 @@ namespace DYTA.Render
         {
             InstanceId = id;
             Bounds = bound;
-        }
-
-        public void SetBounds(RectInt rect)
-        {
-            Bounds = rect;
         }
 
         public void SetPosition(Vector2Int pos)

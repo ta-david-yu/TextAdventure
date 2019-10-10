@@ -9,33 +9,42 @@ namespace DYTA
 {
     class Application
     {
+        private bool m_IsRunning = false;
+
         TextBox m_DebugTxt;
+        TextBox m_NameTxt;
 
         static void Main(string[] args)
         {
             var app = new Application();
+
+            app.registerGlobalEvent();
+
             app.playBgm();
             app.setupMainMenu();
+
             app.run();
+
+            Console.ReadKey();
         }
 
         void setupMainMenu()
         {
-            UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 65, 44), PixelColor.DefaultColor);
+            UINode.Engine.CreateSingleton(new Math.RectInt(0, 0, 65, 34), PixelColor.DefaultColor);
 
             var rootNode = UINode.Engine.Instance.RootNode;
             var rootCanvas = rootNode.GetUIComponent<SingleColorCanvas>();
-            rootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Gray);
+            rootCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
 
             ////
-            var bitmapNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(2, 2, 22, 40));
-            var canvas = bitmapNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+            var bitmapNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(2, 2, 22, 30));
+            var bitmap = bitmapNode.AddUIComponent<Bitmap>();
+            bitmap.LoadFromFile("./Assets/ShuttleScene.txt");
 
             //// 
-            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 37, 40));
-            canvas = textNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Gray, ConsoleColor.Black);
+            var textNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(26, 2, 37, 30));
+            var canvas = textNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
             canvas.ResetBuffer();
 
             //
@@ -44,34 +53,40 @@ namespace DYTA
 
             //
             var testBoxNode2 = UINode.Engine.Instance.CreateNode(new Math.RectInt(1, 2, 9, 1), textNode);
-
-            var box2 = testBoxNode2.AddUIComponent<TextBox>();
-            box2.text = new System.Text.StringBuilder("DAVID");
-            box2.horizontalAlignment = TextBox.HorizontalAlignment.Right;
+            m_NameTxt = testBoxNode2.AddUIComponent<TextBox>();
+            m_NameTxt.text = new System.Text.StringBuilder("");
+            m_NameTxt.horizontalAlignment = TextBox.HorizontalAlignment.Left;
 
             //// 
             var debugNode = UINode.Engine.Instance.CreateNode(new Math.RectInt(0, 43, 65, 1), rootNode);
             m_DebugTxt = debugNode.AddUIComponent<TextBox>();
-            m_DebugTxt.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_DebugTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+        }
+
+        void registerGlobalEvent()
+        {
+            Input.KeyboardListener.Instance.OnKeyPressed += handleOnKeyPressed;
         }
 
         void run()
         {
-            long minimumStepPerFrame = 200;
+            long minimumStepPerFrame = 40;
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             long timeStep = minimumStepPerFrame;
+
+            m_IsRunning = true;
             while (true)
             {
+                update(timeStep);
+
+                m_DebugTxt.text.Length = 0;
+                m_DebugTxt.text.Append("FRAME ELAPSE - " + timeStep);
+
                 UINode.Engine.Instance.PreRenderNodes();
                 UINode.Engine.Instance.RenderNodes();
-                m_DebugTxt.text.Clear();
-                m_DebugTxt.text.Append("FRAME TIME ELAPSE - " + timeStep);
-                m_DebugTxt.Node.Translate(new Math.Vector2Int(1, 0));
-
-                // Do Something 
 
                 timeStep = stopwatch.ElapsedMilliseconds;
 
@@ -83,6 +98,44 @@ namespace DYTA
                 }
 
                 stopwatch.Restart();
+
+                if (!m_IsRunning)
+                {
+                    break;
+                }
+            }
+
+            stopwatch.Stop();
+        }
+
+        void update(long timeStep)
+        {
+            // TODO
+            Input.KeyboardListener.Instance.QueryInput();
+        }
+
+        void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
+        {
+            if (keyInfo.Key == ConsoleKey.Escape)
+            {
+                m_IsRunning = false;
+            }
+            else
+            {
+                // TODO: Event System
+                if (keyInfo.Key == ConsoleKey.Backspace)
+                {
+                    if (m_NameTxt.text.Length > 0)
+                        m_NameTxt.text.Length--;
+                }
+                else if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    m_NameTxt.text.Append('\n');
+                }
+                else
+                {
+                    m_NameTxt.text.Append(keyInfo.KeyChar);
+                }
             }
         }
 
