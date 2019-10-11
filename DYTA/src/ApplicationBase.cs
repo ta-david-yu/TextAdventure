@@ -51,11 +51,14 @@ namespace DYTA
                 Input.KeyboardListener.Instance.QueryInput();
 
                 // logic update
-                logicUpdate(timeStep);
+                update(timeStep);
 
                 // rendering
                 UINode.Engine.Instance.PreRenderNodes();
                 UINode.Engine.Instance.RenderNodes();
+
+                // late logic update, after render
+                postRenderUpdate(timeStep);
 
                 // rendering destruction
                 if (UINode.Engine.Instance.IsDelayedCleanup)
@@ -118,7 +121,9 @@ namespace DYTA
 
         protected abstract void loadInitialScene();
 
-        protected abstract void logicUpdate(long timeStep);
+        protected abstract void update(long timeStep);
+
+        protected virtual void postRenderUpdate(long timeStep) { }
 
         protected abstract void handleOnKeyPressed(ConsoleKeyInfo keyInfo);
     }
