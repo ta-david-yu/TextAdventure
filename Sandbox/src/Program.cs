@@ -15,8 +15,6 @@ namespace Sandbox
             var app = new TextAdventureApp(new DYTA.Math.RectInt(0, 0, 95, 34), new PixelColor(ConsoleColor.Black, ConsoleColor.White));
 
             app.Run();
-
-            Console.ReadKey();
         }
     }
 }

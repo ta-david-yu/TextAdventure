@@ -22,6 +22,7 @@ namespace Sandbox
             if (keyInfo.Key == ConsoleKey.Escape)
             {
                 UINode.Engine.Instance.CleanUp();
+                IsRunning = false;
             }
             else
             {
@@ -71,7 +72,7 @@ namespace Sandbox
 
         protected override void logicUpdate(long timeStep)
         {
-
+            // TODO
         }
 
         private void playBgm()

@@ -26,14 +26,7 @@ namespace DYTA
             gameLoop();
         }
 
-        protected virtual void registerGlobalEvent()
-        {
-            Input.KeyboardListener.Instance.OnKeyPressed += handleOnKeyPressed;
-        }
-
-        protected abstract void initialSetup();
-
-        protected virtual void gameLoop()
+        private void gameLoop()
         {
             long minimumStepPerFrame = 20; // TODO: 40
 
@@ -89,6 +82,13 @@ namespace DYTA
 
             stopwatch.Stop();
         }
+
+        protected virtual void registerGlobalEvent()
+        {
+            Input.KeyboardListener.Instance.OnKeyPressed += handleOnKeyPressed;
+        }
+
+        protected abstract void initialSetup();
 
         protected abstract void logicUpdate(long timeStep);
 
