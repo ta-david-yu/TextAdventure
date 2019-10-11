@@ -84,7 +84,7 @@ namespace DYTA.Render
                         break;
                     case HorizontalAlignment.Center:
                         var halfWidth = Node.Bounds.Width / 2;
-                        var halfTextCount = line.Length / 2;
+                        var halfTextCount = (line.Length % 2 == 0)? line.Length / 2 : (line.Length - 1) / 2;
                         anchorX = halfWidth - halfTextCount;
                         break;
                     case HorizontalAlignment.Right:

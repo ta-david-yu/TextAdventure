@@ -43,7 +43,7 @@ namespace Sandbox
         #endregion
 
         #region InGame Var
-        private TextBox m_NameText;
+        private TextBox m_InputFieldTxt;
 
         #endregion
 
@@ -90,6 +90,24 @@ namespace Sandbox
                         //AudioManager.Instance.Beep(550, 100);
                     }
                 }
+                else if (m_CurrScene == Scene.InGame)
+                {
+                    if (keyInfo.Key == ConsoleKey.Backspace)
+                    {
+                        if (m_InputFieldTxt.text.Length > 0)
+                        {
+                            m_InputFieldTxt.text = m_InputFieldTxt.text.Remove(m_InputFieldTxt.text.Length - 1);
+                        }
+                    }
+                    else if (keyInfo.Key == ConsoleKey.Enter)
+                    {
+                        m_InputFieldTxt.text += '\n';
+                    }
+                    else
+                    {
+                        m_InputFieldTxt.text += keyInfo.KeyChar;
+                    }
+                }
             }
         }
 
@@ -119,8 +137,9 @@ namespace Sandbox
 
             playSpaceOddity();
 
+            //// static ti
             //// 
-            var imgCanNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 60, 35), null, "Image-Canvas");
+            var imgCanNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 2, 60, 35), null, "Image-Canvas");
             var imgCan = imgCanNode.AddUIComponent<SingleColorCanvas>();
             imgCan.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
 
@@ -146,7 +165,7 @@ namespace Sandbox
             ////
             var txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, m_MenuOptionAnchor, 28, 3), m_MainMenuNode, "Text0-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
             m_MainOptionCanvases.Add(canvas);
 
             var newGameNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
@@ -158,7 +177,7 @@ namespace Sandbox
             ////
             txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, m_MenuOptionAnchor + m_MenuOptionOffset, 28, 3), m_MainMenuNode, "Text1-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
             m_MainOptionCanvases.Add(canvas);
 
             var loadGameNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
@@ -170,7 +189,7 @@ namespace Sandbox
             ////
             txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, m_MenuOptionAnchor + m_MenuOptionOffset * 2, 28, 3), m_MainMenuNode, "Text2-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
             m_MainOptionCanvases.Add(canvas);
 
             var exitNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
@@ -212,24 +231,33 @@ namespace Sandbox
             m_CurrScene = Scene.InGame;
 
             ////
-            var bitmapNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 2, 22, 30), null, "Bitmap");
-            var bitmap = bitmapNode.AddUIComponent<Bitmap>();
-            bitmap.LoadFromFile("./Assets/ShuttleScene.txt");
+            var locationNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 2, 22, 30), null, "LocationCanvas");
+            var locationCanvas = locationNode.AddUIComponent<SingleColorCanvas>();
+            locationCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.White);
+
+            var locationLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 22, 30), locationNode, "Bitmap");
+            var locationLayout = locationLayoutNode.AddUIComponent<Bitmap>();
+            locationLayout.LoadFromFile("./Assets/LocationLayout.txt", Bitmap.DrawType.Sliced);
 
             //// 
             var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 30), null, "Descr-Canvas");
-            var canvas = descriptionNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+            var descriptionCanvas = descriptionNode.AddUIComponent<SingleColorCanvas>();
+            descriptionCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.White);
+
+            // 
+            var descriptionLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 30), descriptionNode, "Layout-Canvas");
+            var descriptionLayout = descriptionLayoutNode.AddUIComponent<Bitmap>();
+            descriptionLayout.LoadFromFile("./Assets/LocationLayout.txt", Bitmap.DrawType.Sliced);
 
             //
-            var boxNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 9, 1), descriptionNode, "UnlitBox");
-            var box = boxNode.AddUIComponent<UnlitBox>();
+            var unlitBoxNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 9, 1), descriptionNode, "UnlitBox");
+            var unlitBox = unlitBoxNode.AddUIComponent<UnlitBox>();
 
             //
-            var textNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 2, 9, 1), descriptionNode, "Text");
-            m_NameText = textNode.AddUIComponent<TextBox>();
-            m_NameText.text = string.Empty;
-            m_NameText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            var textNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 2, 65, 1), descriptionNode, "Text");
+            m_InputFieldTxt = textNode.AddUIComponent<TextBox>();
+            m_InputFieldTxt.text = string.Empty;
+            m_InputFieldTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
         }
 
         #endregion
@@ -340,13 +368,13 @@ namespace Sandbox
                 {
                     var pos = new Vector2Int(1, m_MenuOptionAnchor + m_MenuOptionOffset * i);
                     canvas.Node.SetPosition(pos);
-                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.White, ConsoleColor.Black);
+                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Yellow, ConsoleColor.Black);
                 }
                 else
                 {
                     var pos = new Vector2Int(2, m_MenuOptionAnchor + m_MenuOptionOffset * i);
                     canvas.Node.SetPosition(pos);
-                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
                 }
             }
         }

@@ -20,33 +20,68 @@ namespace DYTA.Render
         {
         }
 
-        public void LoadFromFile(string filePath)
+        public void LoadFromFile(string filePath, DrawType drawType = DrawType.Normal)
         {
             var lines = System.IO.File.ReadAllLines(filePath);
 
-            Load(lines);
+            Load(lines, drawType);
         }
 
-        public void Load(string[] lines)
+        public void Load(string[] lines, DrawType drawType = DrawType.Normal)
         {
             Data = new List<StringBuilder>();
 
-            for (int y = 0; y < Node.Bounds.Height; y++)
+            if (drawType == DrawType.Normal)
             {
-                if (y < lines.Length)
+                for (int y = 0; y < Node.Bounds.Height; y++)
                 {
-                    var line = lines[y];
-                    Data.Add(new StringBuilder(line));
-
-                    if (line.Length < Node.Bounds.Width)
+                    if (y < lines.Length)
                     {
-                        Data[y].Append(new string(' ', Node.Bounds.Width - line.Length));
+                        var line = lines[y];
+                        Data.Add(new StringBuilder(line));
+
+                        if (line.Length < Node.Bounds.Width)
+                        {
+                            Data[y].Append(new string(' ', Node.Bounds.Width - line.Length));
+                        }
+                    }
+                    else
+                    {
+                        var line = new StringBuilder(new string(' ', Node.Bounds.Width));
+                        Data.Add(line);
                     }
                 }
-                else
+            }
+            else if (drawType == DrawType.Sliced)
+            {
+                for (int y = 0; y < Node.Bounds.Height; y++)
                 {
-                    var line = new StringBuilder(new string(' ', Node.Bounds.Width));
-                    Data.Add(line);
+                    char head = ' ';
+                    char middle = ' ';
+                    char end = ' ';
+                    if (y == 0)
+                    {
+                        head = lines[0][0];
+                        middle = lines[0][1];
+                        end = lines[0][2];
+                    }
+                    else if (y == Node.Bounds.Height - 1)
+                    {
+                        head = lines[2][0];
+                        middle = lines[2][1];
+                        end = lines[2][2];
+                    }
+                    else
+                    {
+                        head = lines[1][0];
+                        middle = lines[1][1];
+                        end = lines[1][2];
+                    }
+
+                    Data.Add(new StringBuilder());
+                    Data[y].Append(head);
+                    Data[y].Append(new string(middle, Node.Bounds.Width - 2));
+                    Data[y].Append(end);
                 }
             }
         }

@@ -251,12 +251,6 @@ namespace DYTA.Render
             SetDirty();
         }
 
-        public void SetSize(Vector2Int size)
-        {
-            Bounds = new RectInt(Bounds.Position, size);
-            SetDirty();
-        }
-
         public void Translate(Vector2Int offset)
         {
             SetPosition(Bounds.Position + offset);
