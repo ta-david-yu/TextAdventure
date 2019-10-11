@@ -46,7 +46,6 @@ namespace DYTA.Audio
 
         public void Begin()
         {
-            //if (m_Thread == null)
             {
                 m_Thread = new System.Threading.Thread(() =>
                 {

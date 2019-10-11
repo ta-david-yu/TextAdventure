@@ -45,7 +45,7 @@ namespace DYTA
             {
                 // debug
                 string frameInfo = string.Format("FRAME: {0, -5}- TIMESTEP: {1, -5}- NODE CT: {2, -5}", ++frameCounter, timeStep, UINode.Engine.Instance.NodeIdCounter);
-                FrameLogger.Log(frameInfo);
+                //FrameLogger.Log(frameInfo);
 
                 // input
                 Input.KeyboardListener.Instance.QueryInput();
@@ -64,7 +64,7 @@ namespace DYTA
                 }
 
                 // logging
-                FrameLogger.Update();
+                //FrameLogger.Update();
 
                 // scene loading
                 if (WillChangeScene)

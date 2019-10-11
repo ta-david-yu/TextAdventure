@@ -19,9 +19,15 @@ namespace Sandbox
 
         private Scene m_CurrScene = Scene.MainMenu;
 
-        private TextBox m_NameTxt;
+        #region MainMenu Var
+        private Bitmap m_TitleBitmap;
+        private TextBox m_NewGameText;
+        private TextBox m_LoadGameText;
+        private TextBox m_ExitText;
 
-        private float m_TextMoveCount = 0.2f;
+        #endregion
+
+        private TextBox m_NameTxt;
 
         public TextAdventureApp(RectInt bounds, PixelColor color) : base(bounds, color)
         {
@@ -78,14 +84,6 @@ namespace Sandbox
             // TODO
             if (m_CurrScene == Scene.MainMenu)
             {
-                m_TextMoveCount -= second;
-
-                if (m_TextMoveCount < 0)
-                {
-
-                    m_NameTxt.Node.Translate(new Vector2Int(1, 1));
-                    m_TextMoveCount = 0.2f;
-                }
             }
         }
 
@@ -98,12 +96,61 @@ namespace Sandbox
             m_CurrScene = Scene.MainMenu;
 
             playSpaceOddity();
+            //// MainNode
 
-            var textNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 90, 1), null, "Text");
-            m_NameTxt = textNode.AddUIComponent<TextBox>();
-            m_NameTxt.text = "Main Menu";
-            m_NameTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
-            m_NameTxt.verticalAlignment = TextBox.VerticalAlignment.Middle;
+
+            //// 
+            var imgCanNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 60, 35), null, "Image-Canvas");
+            var imgCan = imgCanNode.AddUIComponent<SingleColorCanvas>();
+            imgCan.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+            var imgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 60, 35), imgCanNode, "Image");
+            var img = imgNode.AddUIComponent<Bitmap>();
+            img.LoadFromFile("./Assets/SpaceStation.txt");
+
+            ///
+            var iconCanNode = UINode.Engine.Instance.CreateNode(new RectInt(60, 2, 35, 10), null, "Icon-Canvas");
+            var canvas = iconCanNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+            var iconNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 33, 10), iconCanNode, "Icon");
+            img = iconNode.AddUIComponent<Bitmap>();
+            img.LoadFromFile("./Assets/TitleText.txt");
+
+
+            int menuAnchor = 13;
+            ////
+            var txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(60, menuAnchor, 32, 3), null, "Text0-Canvas");
+            canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+            
+            var newGameNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            m_NewGameText = newGameNode.AddUIComponent<TextBox>();
+            m_NewGameText.text = "NEW ADVENTURE";
+            m_NewGameText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_NewGameText.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+            ////
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(60, menuAnchor + 4, 32, 3), null, "Text1-Canvas");
+            canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+
+            var loadGameNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            m_LoadGameText = loadGameNode.AddUIComponent<TextBox>();
+            m_LoadGameText.text = "LOAD ADVENTURE";
+            m_LoadGameText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_LoadGameText.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+            ////
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(60, menuAnchor + 8, 32, 3), null, "Text2-Canvas");
+            canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
+
+            var exitNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            m_ExitText = exitNode.AddUIComponent<TextBox>();
+            m_ExitText.text = "EXIT";
+            m_ExitText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_ExitText.verticalAlignment = TextBox.VerticalAlignment.Top;
         }
 
         private void loadInGame()

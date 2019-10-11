@@ -125,8 +125,6 @@ namespace DYTA.Render
                         node.RenderUIs();
                         dirtyCanvases.Add(node.ParentCanvas);
 
-                        Console.SetCursorPosition(0, UINode.Engine.Instance.RootNode.Bounds.Size.Y + index + NodeIdCounter + 1);
-
                         var info = string.Empty;
                         info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
                         info += string.Format("p {0,2} {1,-15} PCD:{2}", node.ParentCanvas.Node.InstanceId, node.ParentCanvas.Node.Name, node.ParentCanvas.IsDirty);
