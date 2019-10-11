@@ -31,35 +31,38 @@ namespace DYTA.Audio
             }
         }
 
-        private System.Threading.Thread m_Thread;
+        private System.Threading.Thread m_MusicThread;
+        private System.Threading.Thread m_SfxThread;
 
-        private Queue<BeepUnit> m_UnitQueue = new Queue<BeepUnit>();
+        private Queue<BeepUnit> m_MusicQueue = new Queue<BeepUnit>();
+        private Queue<BeepUnit> m_SfxQueue = new Queue<BeepUnit>();
 
         private bool m_IsPlaying = false;
 
-        public event Action OnQueueEmptied = delegate { };
+        public event Action OnMusicQueueEmptied = delegate { };
+        public event Action OnSoundQueueEmptied = delegate { };
 
-        public AudioManager()
+        AudioManager()
         {
 
         }
 
         public void Begin()
         {
-            if (m_Thread == null)
+            if (m_MusicThread == null)
             {
-                m_Thread = new System.Threading.Thread(() =>
+                m_MusicThread = new System.Threading.Thread(() =>
                 {
                     while (true)
                     {
                         if (m_IsPlaying)
                         {
-                            if (m_UnitQueue.Count > 0)
+                            if (m_MusicQueue.Count > 0)
                             {
                                 BeepUnit unit;
                                 lock (s_Lock)
                                 {
-                                    unit = m_UnitQueue.Dequeue();
+                                    unit = m_MusicQueue.Dequeue();
                                 }
 
                                 if (!unit.IsMute)
@@ -67,16 +70,49 @@ namespace DYTA.Audio
                                 else
                                     System.Threading.Thread.Sleep(unit.Duration);
 
-                                if (m_UnitQueue.Count == 0)
+                                if (m_MusicQueue.Count == 0)
                                 {
-                                    OnQueueEmptied.Invoke();
+                                    OnMusicQueueEmptied.Invoke();
                                 }
                             }
                         }
                     }
                 });
-                m_Thread.IsBackground = true;
-                m_Thread.Start();
+                m_MusicThread.IsBackground = true;
+                m_MusicThread.Start();
+            }
+
+            if (m_SfxThread == null)
+            {
+                m_SfxThread = new System.Threading.Thread(() =>
+                {
+                    while (true)
+                    {
+                        if (m_IsPlaying)
+                        {
+                            if (m_SfxQueue.Count > 0)
+                            {
+                                BeepUnit unit;
+                                lock (s_Lock)
+                                {
+                                    unit = m_SfxQueue.Dequeue();
+                                }
+
+                                if (!unit.IsMute)
+                                    Console.Beep(unit.Frequency, unit.Duration);
+                                else
+                                    System.Threading.Thread.Sleep(unit.Duration);
+
+                                if (m_SfxQueue.Count == 0)
+                                {
+                                    OnSoundQueueEmptied.Invoke();
+                                }
+                            }
+                        }
+                    }
+                });
+                m_SfxThread.IsBackground = true;
+                m_SfxThread.Start();
             }
 
             m_IsPlaying = true;
@@ -88,24 +124,45 @@ namespace DYTA.Audio
             StopAllAudio();
         }
 
-        public void Beep(int fre, int dur)
+        public void BeepMusic(int fre, int dur)
         {
             BeepUnit unit = new BeepUnit();
             unit.Frequency = fre; unit.Duration = (int)(dur);
             lock (s_Lock)
             {
-                m_UnitQueue.Enqueue(unit);
+                m_MusicQueue.Enqueue(unit);
             }
         }
 
-        public void Delay(int dur)
+        public void DelayMusic(int dur)
         {
             BeepUnit unit = new BeepUnit();
             unit.IsMute = true;
             unit.Duration = (int)(dur);
             lock (s_Lock)
             {
-                m_UnitQueue.Enqueue(unit);
+                m_MusicQueue.Enqueue(unit);
+            }
+        }
+
+        public void BeepSfx(int fre, int dur)
+        {
+            BeepUnit unit = new BeepUnit();
+            unit.Frequency = fre; unit.Duration = (int)(dur);
+            lock (s_Lock)
+            {
+                m_SfxQueue.Enqueue(unit);
+            }
+        }
+
+        public void DelaySfx(int dur)
+        {
+            BeepUnit unit = new BeepUnit();
+            unit.IsMute = true;
+            unit.Duration = (int)(dur);
+            lock (s_Lock)
+            {
+                m_SfxQueue.Enqueue(unit);
             }
         }
 
@@ -113,7 +170,8 @@ namespace DYTA.Audio
         {
             lock (s_Lock)
             {
-                m_UnitQueue.Clear();
+                m_MusicQueue.Clear();
+                m_SfxQueue.Clear();
             }
         }
     }

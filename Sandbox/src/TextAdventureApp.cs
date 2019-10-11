@@ -63,6 +63,7 @@ namespace Sandbox
 
         #endregion
 
+
         public TextAdventureApp(RectInt bounds, PixelColor color) : base(bounds, color)
         {
         }
@@ -91,19 +92,19 @@ namespace Sandbox
                     if (keyInfo.Key == ConsoleKey.UpArrow)
                     {
                         m_CurrMenuSelection = (m_CurrMenuSelection - 1 < 0) ? m_MainOptionTextes.Count - 1 : m_CurrMenuSelection - 1;
-                        //AudioManager.Instance.Beep(300, 100);
+                        //AudioManager.Instance.BeepSfx(300, 100);
                         selectMainMenuOption(m_CurrMenuSelection);
                     }
                     else if (keyInfo.Key == ConsoleKey.DownArrow)
                     {
                         m_CurrMenuSelection = (m_CurrMenuSelection + 1 > m_MainOptionTextes.Count - 1) ? 0 : m_CurrMenuSelection + 1;
-                        //AudioManager.Instance.Beep(300, 100);
+                        //AudioManager.Instance.BeepSfx(300, 100);
                         selectMainMenuOption(m_CurrMenuSelection);
                     }
                     else if (keyInfo.Key == ConsoleKey.Enter)
                     {
                         confirmMainMenuOption();
-                        //AudioManager.Instance.Beep(550, 100);
+                        //AudioManager.Instance.BeepSfx(550, 100);
                     }
                 }
                 else if (m_CurrScene == Scene.InGame)
@@ -316,16 +317,11 @@ namespace Sandbox
             descriptionTitleNode.verticalAlignment = TextBox.VerticalAlignment.Top;
             descriptionTitleNode.text = "+---[ DESCRIPTION ]";
 
-
             //
-            var unlitBoxNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 9, 1), descriptionNode, "UnlitBox");
-            var unlitBox = unlitBoxNode.AddUIComponent<UnlitBox>();
-
-            //
-            var descriptionTextNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 2, 65, 1), descriptionNode, "Text");
+            var descriptionTextNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 2, 65, 1), descriptionNode, "Text");
             m_DesciptionTxt = descriptionTextNode.AddUIComponent<TextBox>();
-            m_DesciptionTxt.text = string.Empty;
-            m_DesciptionTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            m_DesciptionTxt.text = "This is the situation description, do something. Describe the \nlocation and the things you could do";
+            m_DesciptionTxt.horizontalAlignment = TextBox.HorizontalAlignment.Left;
 
 
             //// InputField
@@ -373,99 +369,96 @@ namespace Sandbox
 
         private void playSpaceOddity()
         {
-            
             #region Audio
 
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(523, 200); // DO
-            AudioManager.Instance.Beep(523, 600); // DO
-            AudioManager.Instance.Beep(523, 200); // DO
-            AudioManager.Instance.Beep(587, 600); // RE
-            AudioManager.Instance.Beep(523, 200); // DO
-            AudioManager.Instance.Beep(494, 600); // SI
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(523, 200); // DO
+            AudioManager.Instance.BeepMusic(523, 600); // DO
+            AudioManager.Instance.BeepMusic(523, 200); // DO
+            AudioManager.Instance.BeepMusic(587, 600); // RE
+            AudioManager.Instance.BeepMusic(523, 200); // DO
+            AudioManager.Instance.BeepMusic(494, 600); // SI
 
-            AudioManager.Instance.Delay(1200);
+            AudioManager.Instance.DelayMusic(1200);
 
-            AudioManager.Instance.Beep(440, 800); // LA
-            AudioManager.Instance.Beep(392, 800); // SO
-            AudioManager.Instance.Beep(523, 800); // DO
+            AudioManager.Instance.BeepMusic(440, 800); // LA
+            AudioManager.Instance.BeepMusic(392, 800); // SO
+            AudioManager.Instance.BeepMusic(523, 800); // DO
 
-            AudioManager.Instance.Delay(100);
+            AudioManager.Instance.DelayMusic(100);
 
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(523, 200); // DO
-            AudioManager.Instance.Beep(523, 600); // DO 
-            AudioManager.Instance.Beep(523, 200); // DO
-            AudioManager.Instance.Beep(587, 600); // RE
-            AudioManager.Instance.Beep(523, 200); // DO
-            AudioManager.Instance.Beep(494, 600); // SI
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(523, 200); // DO
+            AudioManager.Instance.BeepMusic(523, 600); // DO 
+            AudioManager.Instance.BeepMusic(523, 200); // DO
+            AudioManager.Instance.BeepMusic(587, 600); // RE
+            AudioManager.Instance.BeepMusic(523, 200); // DO
+            AudioManager.Instance.BeepMusic(494, 600); // SI
 
-            AudioManager.Instance.Delay(4000);
+            AudioManager.Instance.DelayMusic(4000);
 
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(587, 200); // RE
-            AudioManager.Instance.Beep(587, 1200); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(587, 200); // RE
+            AudioManager.Instance.BeepMusic(587, 1200); // RE
 
-            AudioManager.Instance.Delay(800);
+            AudioManager.Instance.DelayMusic(800);
 
             // Elevate
             int initial = 300;
             int increment = 25;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 400); // RE
+            AudioManager.Instance.BeepMusic(initial, 400); // RE
             initial += increment;
-            AudioManager.Instance.Beep(initial, 3200); // RE
+            AudioManager.Instance.BeepMusic(initial, 3200); // RE
 
-            AudioManager.Instance.Delay(800);
+            AudioManager.Instance.DelayMusic(800);
 
-            AudioManager.Instance.Beep(392, 200); // SO
-            AudioManager.Instance.Beep(392, 600); // SO
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(698, 400); // FA
-            AudioManager.Instance.Beep(659, 400); // MI
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(494, 600); // SI
+            AudioManager.Instance.BeepMusic(392, 200); // SO
+            AudioManager.Instance.BeepMusic(392, 600); // SO
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(698, 400); // FA
+            AudioManager.Instance.BeepMusic(659, 400); // MI
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(494, 600); // SI
 
-            AudioManager.Instance.Delay(800);
+            AudioManager.Instance.DelayMusic(800);
 
-            AudioManager.Instance.Beep(494, 400); // SI
-            AudioManager.Instance.Beep(659, 400); // MI
-            AudioManager.Instance.Beep(587, 400); // RE
-            AudioManager.Instance.Beep(523, 400); // DO
-            AudioManager.Instance.Beep(494, 400); // SI
-            AudioManager.Instance.Beep(523, 600); // DO
-            AudioManager.Instance.Beep(587, 200); // RE
-            AudioManager.Instance.Beep(440, 600); // LA
+            AudioManager.Instance.BeepMusic(494, 400); // SI
+            AudioManager.Instance.BeepMusic(659, 400); // MI
+            AudioManager.Instance.BeepMusic(587, 400); // RE
+            AudioManager.Instance.BeepMusic(523, 400); // DO
+            AudioManager.Instance.BeepMusic(494, 400); // SI
+            AudioManager.Instance.BeepMusic(523, 600); // DO
+            AudioManager.Instance.BeepMusic(587, 200); // RE
+            AudioManager.Instance.BeepMusic(440, 600); // LA
 
             // .. and the papers want to know whose shirts you wear
 
 
             #endregion
-
-            AudioManager.Instance.Begin();
         }
 
         #region MainMenu func

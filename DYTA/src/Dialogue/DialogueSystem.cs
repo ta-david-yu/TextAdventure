@@ -94,7 +94,10 @@ namespace DYTA.Dialogue
         {
             var serializer = new DataContractJsonSerializer(typeof(DialogueTree));
             var stream = File.Open(path, FileMode.Open);
+
             Tree = (DialogueTree)serializer.ReadObject(stream);
+
+            stream.Close();
         }
 
         public int GetVariableValue(string variableName)

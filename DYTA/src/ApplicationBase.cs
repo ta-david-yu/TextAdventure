@@ -27,6 +27,8 @@ namespace DYTA
 
             IsRunning = true;
 
+            Audio.AudioManager.Instance.Begin();
+
             gameLoop();
         }
 
