@@ -29,7 +29,9 @@ namespace Sandbox
         private UINode m_MainMenuNode;
 
         private Bitmap m_TitleBitmap;
-        private List<SingleColorCanvas> m_MainOptionCanvases = new List<SingleColorCanvas>();
+        private TextBox m_CreditText;
+
+        private List<TextBox> m_MainOptionTextes = new List<TextBox>();
 
         private TextBox m_NewGameText;
         private TextBox m_LoadGameText;
@@ -37,8 +39,10 @@ namespace Sandbox
 
         private int m_CurrMenuSelection = 0;
 
-        private const int c_MenuOptionAnchor = 2;
-        private const int c_MenuOptionOffset = 4;
+        private const int c_MenuOptionAnchor = 3;
+        private const int c_MenuOptionOffset = 2;
+
+        private static readonly List<string> c_OptionTexts = new List<string>() { "NEW LAUNCH", "CONTINUE", "EXIT" };
 
         #endregion
 
@@ -48,6 +52,7 @@ namespace Sandbox
         private TextBox m_InputFieldTxt;
         private TextBox m_PromptText;
         private UnlitBox m_CursorText;
+        private TextBox m_RespondText;
 
         private StringBuilder m_InputString = new StringBuilder("");
         private float m_CursorFlickringTimer = 0;
@@ -85,13 +90,13 @@ namespace Sandbox
                 {
                     if (keyInfo.Key == ConsoleKey.UpArrow)
                     {
-                        m_CurrMenuSelection = (m_CurrMenuSelection - 1 < 0) ? m_MainOptionCanvases.Count - 1 : m_CurrMenuSelection - 1;
+                        m_CurrMenuSelection = (m_CurrMenuSelection - 1 < 0) ? m_MainOptionTextes.Count - 1 : m_CurrMenuSelection - 1;
                         //AudioManager.Instance.Beep(300, 100);
                         selectMainMenuOption(m_CurrMenuSelection);
                     }
                     else if (keyInfo.Key == ConsoleKey.DownArrow)
                     {
-                        m_CurrMenuSelection = (m_CurrMenuSelection + 1 > m_MainOptionCanvases.Count - 1) ? 0 : m_CurrMenuSelection + 1;
+                        m_CurrMenuSelection = (m_CurrMenuSelection + 1 > m_MainOptionTextes.Count - 1) ? 0 : m_CurrMenuSelection + 1;
                         //AudioManager.Instance.Beep(300, 100);
                         selectMainMenuOption(m_CurrMenuSelection);
                     }
@@ -169,7 +174,7 @@ namespace Sandbox
         {
             m_CurrScene = Scene.MainMenu;
             m_CurrMenuSelection = 0;
-            m_MainOptionCanvases = new List<SingleColorCanvas>();
+            m_MainOptionTextes = new List<TextBox>();
 
             playSpaceOddity();
 
@@ -186,11 +191,17 @@ namespace Sandbox
             ///
             var iconCanNode = UINode.Engine.Instance.CreateNode(new RectInt(60, 2, 35, 10), null, "Icon-Canvas");
             var canvas = iconCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Magenta);
 
             var iconNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 33, 10), iconCanNode, "Icon");
             m_TitleBitmap = iconNode.AddUIComponent<Bitmap>();
             m_TitleBitmap.LoadFromFile("./Assets/TitleText.txt");
+
+            var creditNode = UINode.Engine.Instance.CreateNode(new RectInt(-1, 0, 33, 10), iconCanNode, "Icon");
+            m_CreditText = creditNode.AddUIComponent<TextBox>();
+            m_CreditText.text = " By Ta David Yu ";
+            m_CreditText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            m_CreditText.verticalAlignment = TextBox.VerticalAlignment.Bottom;
 
             #region MainMenuOption
 
@@ -201,56 +212,59 @@ namespace Sandbox
             ////
             var txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor, 28, 3), m_MainMenuNode, "Text0-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
-            m_MainOptionCanvases.Add(canvas);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
-            var newGameNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            var newGameNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanNode, "NEW");
             m_NewGameText = newGameNode.AddUIComponent<TextBox>();
             m_NewGameText.text = "NEW ADVENTURE";
-            m_NewGameText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_NewGameText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             m_NewGameText.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+            m_MainOptionTextes.Add(m_NewGameText);
 
             ////
             txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + c_MenuOptionOffset, 28, 3), m_MainMenuNode, "Text1-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
-            m_MainOptionCanvases.Add(canvas);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
-            var loadGameNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            var loadGameNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanNode, "CONT");
             m_LoadGameText = loadGameNode.AddUIComponent<TextBox>();
-            m_LoadGameText.text = "LOAD ADVENTURE";
-            m_LoadGameText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_LoadGameText.text = "CONTINUE";
+            m_LoadGameText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             m_LoadGameText.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+            m_MainOptionTextes.Add(m_LoadGameText);
 
             ////
             txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + c_MenuOptionOffset * 2, 28, 3), m_MainMenuNode, "Text2-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
-            m_MainOptionCanvases.Add(canvas);
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
-            var exitNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            var exitNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanNode, "EXIT");
             m_ExitText = exitNode.AddUIComponent<TextBox>();
             m_ExitText.text = "EXIT";
-            m_ExitText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+            m_ExitText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             m_ExitText.verticalAlignment = TextBox.VerticalAlignment.Top;
 
-            //
-            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, c_MenuOptionAnchor + 11, 30, 3), m_MainMenuNode, "Hint-Canvas");
-            canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+            m_MainOptionTextes.Add(m_ExitText);
 
-            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            // - Hint
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, c_MenuOptionAnchor + 9, 30, 3), m_MainMenuNode, "Hint-Canvas");
+            canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkRed);
+
+            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 1, 23, 1), txtCanNode, "HINT");
             var hintTxt = hintNode.AddUIComponent<TextBox>();
-            hintTxt.text = "arrows: select\nenter: confirm";
+            hintTxt.text = "arrows-select\nenter-confirm";
             hintTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             hintTxt.verticalAlignment = TextBox.VerticalAlignment.Top;
 
             //
-            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, c_MenuOptionAnchor + 14, 30, 3), m_MainMenuNode, "Hint-Canvas");
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, c_MenuOptionAnchor + 12, 30, 3), m_MainMenuNode, "Hint-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkRed);
 
-            hintNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
+            hintNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 1, 23, 1), txtCanNode, "MUSIC");
             hintTxt = hintNode.AddUIComponent<TextBox>();
             hintTxt.text = "MUSIC - SPACE ODDITY";
             hintTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
@@ -265,7 +279,9 @@ namespace Sandbox
 
         private void loadInGame()
         {
-            DYTA.Dialogue.DialogueSystem.Instance.debug();
+            //DYTA.Dialogue.DialogueSystem.Instance.debug();
+
+            DYTA.Dialogue.DialogueSystem.Instance.LoadScriptsFromFile("./test.json");
 
             m_CurrScene = Scene.InGame;
 
@@ -313,12 +329,12 @@ namespace Sandbox
 
 
             //// InputField
-            var inputFieldNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 26, 67, 6), null, "Input-Canvas");
+            var inputFieldNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 24, 67, 8), null, "Input-Canvas");
             var inputFieldCanvas = inputFieldNode.AddUIComponent<SingleColorCanvas>();
             inputFieldCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
 
             // 
-            var inputLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 6), inputFieldNode, "Layout-Canvas");
+            var inputLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 8), inputFieldNode, "Layout-Canvas");
             var inputLayout = inputLayoutNode.AddUIComponent<Bitmap>();
             inputLayout.LoadFromFile("./Assets/LocationLayout.txt", Bitmap.DrawType.Sliced);
 
@@ -341,6 +357,16 @@ namespace Sandbox
             var inputFieldCursorNode = UINode.Engine.Instance.CreateNode(new RectInt(c_CursorAnchor, Vector2Int.One), inputFieldNode, "Cursor");
             m_CursorText = inputFieldCursorNode.AddUIComponent<UnlitBox>();
             m_CursorText.UnlitCharacter = '_';
+
+            //// Respond
+            var respondCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 4, 63, 2), inputFieldNode, "Output-Canvas");
+            var outputCanvas = respondCanvasNode.AddUIComponent<SingleColorCanvas>();
+            outputCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.White);
+
+            var respondTxtNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 62, 2), respondCanvasNode, "Output");
+            m_RespondText = respondTxtNode.AddUIComponent<TextBox>();
+            m_RespondText.text = "This is the respond of your action, be careful about it.\nIt can overflow";
+            m_RespondText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
         }
 
         #endregion
@@ -445,20 +471,22 @@ namespace Sandbox
         #region MainMenu func
         private void selectMainMenuOption(int id)
         {
-            for (int i = 0; i < m_MainOptionCanvases.Count; i++)
+            for (int i = 0; i < m_MainOptionTextes.Count; i++)
             {
-                var canvas = m_MainOptionCanvases[i];
+                var txt = m_MainOptionTextes[i];
                 if (i == id)
                 {
-                    var pos = new Vector2Int(1, c_MenuOptionAnchor + c_MenuOptionOffset * i);
-                    canvas.Node.SetPosition(pos);
-                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Yellow, ConsoleColor.Black);
+                    //var pos = new Vector2Int(1, c_MenuOptionAnchor + c_MenuOptionOffset * i);
+                    //canvas.Node.SetPosition(pos);
+                    txt.text = string.Format("> {0} <", c_OptionTexts[i]);
+                    (txt.Node.ParentCanvas as SingleColorCanvas).CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
                 }
                 else
                 {
-                    var pos = new Vector2Int(2, c_MenuOptionAnchor + c_MenuOptionOffset * i);
-                    canvas.Node.SetPosition(pos);
-                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkYellow, ConsoleColor.Black);
+                    //var pos = new Vector2Int(2, c_MenuOptionAnchor + c_MenuOptionOffset * i);
+                    //canvas.Node.SetPosition(pos);
+                    txt.text = string.Format("{0}", c_OptionTexts[i]);
+                    (txt.Node.ParentCanvas as SingleColorCanvas).CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
                 }
             }
         }

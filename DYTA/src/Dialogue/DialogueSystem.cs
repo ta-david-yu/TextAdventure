@@ -83,16 +83,18 @@ namespace DYTA.Dialogue
 
             var stream = File.Create("./test.json");
             DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
-            var ser = new DataContractJsonSerializer(typeof(DialogueTree));
+            var serializer = new DataContractJsonSerializer(typeof(DialogueTree));
 
-            ser.WriteObject(stream, Tree);
+            serializer.WriteObject(stream, Tree);
 
             stream.Close();
         }
 
         public void LoadScriptsFromFile(string path)
         {
-
+            var serializer = new DataContractJsonSerializer(typeof(DialogueTree));
+            var stream = File.Open(path, FileMode.Open);
+            Tree = (DialogueTree)serializer.ReadObject(stream);
         }
 
         public int GetVariableValue(string variableName)

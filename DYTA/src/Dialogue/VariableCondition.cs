@@ -17,7 +17,7 @@ namespace DYTA.Dialogue
         }
 
         [DataMember]
-        public string VariableName { get; set; }
+        public string VariableName { get; set; } = "VariableName";
 
         [DataMember]
         public VariableComparator Comparator { get; set; }

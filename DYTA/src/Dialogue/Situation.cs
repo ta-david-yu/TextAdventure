@@ -27,6 +27,6 @@ namespace DYTA.Dialogue
 
         [DataMember]
         // action when every time reach this situation
-        public List<SetGlobalVariable> AlwaysSetValueAction { get; set; }
+        public List<SetGlobalVariable> AlwaysSetValueAction { get; set; } = new List<SetGlobalVariable>();
     }
 }
