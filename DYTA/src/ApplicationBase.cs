@@ -10,6 +10,10 @@ namespace DYTA
     {
         public bool IsRunning { get; protected set; } = false;
 
+        public bool WillChangeScene { get; protected set; } = false;
+
+        private Action m_NextSceneSetupCall = delegate { };
+
         public ApplicationBase(Math.RectInt bounds, PixelColor color)
         {
             UINode.Engine.CreateSingleton(bounds, color);
@@ -19,7 +23,7 @@ namespace DYTA
         {
             registerGlobalEvent();
 
-            initialSetup();
+            loadInitialScene();
 
             IsRunning = true;
 
@@ -40,7 +44,7 @@ namespace DYTA
             while (true)
             {
                 // debug
-                string frameInfo = string.Format("FRAME: {0, -5}- TIMESTEP: {1, -5}", ++frameCounter, timeStep);
+                string frameInfo = string.Format("FRAME: {0, -5}- TIMESTEP: {1, -5}- NODE CT: {2, -5}", ++frameCounter, timeStep, UINode.Engine.Instance.NodeIdCounter);
                 FrameLogger.Log(frameInfo);
 
                 // input
@@ -62,17 +66,35 @@ namespace DYTA
                 // logging
                 FrameLogger.Update();
 
-                // time calculation
-                timeStep = stopwatch.ElapsedMilliseconds;
-
-                if (timeStep < minimumStepPerFrame)
+                // scene loading
+                if (WillChangeScene)
                 {
-                    int sleep = (int)(minimumStepPerFrame - timeStep);
-                    System.Threading.Thread.Sleep(sleep);
-                    timeStep = minimumStepPerFrame;
-                }
+                    Console.SetCursorPosition(0, 0);
+                    Console.WriteLine("LOADING......");
 
-                stopwatch.Restart();
+                    WillChangeScene = false;
+
+                    Audio.AudioManager.Instance.End();
+                    UINode.Engine.Instance.Destruction();
+
+                    m_NextSceneSetupCall.Invoke();
+
+                    Audio.AudioManager.Instance.Begin();
+                }
+                else
+                {
+                    // time calculation
+                    timeStep = stopwatch.ElapsedMilliseconds;
+
+                    if (timeStep < minimumStepPerFrame)
+                    {
+                        int sleep = (int)(minimumStepPerFrame - timeStep);
+                        System.Threading.Thread.Sleep(sleep);
+                        timeStep = minimumStepPerFrame;
+                    }
+
+                    stopwatch.Restart();
+                }
 
                 if (!IsRunning)
                 {
@@ -83,12 +105,18 @@ namespace DYTA
             stopwatch.Stop();
         }
 
+        protected void loadScene(Action sceneSetupCall)
+        {
+            WillChangeScene = true;
+            m_NextSceneSetupCall = sceneSetupCall;
+        }
+
         protected virtual void registerGlobalEvent()
         {
             Input.KeyboardListener.Instance.OnKeyPressed += handleOnKeyPressed;
         }
 
-        protected abstract void initialSetup();
+        protected abstract void loadInitialScene();
 
         protected abstract void logicUpdate(long timeStep);
 

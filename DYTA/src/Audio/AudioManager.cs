@@ -20,7 +20,7 @@ namespace DYTA.Audio
         {
             get
             {
-                lock (s_Lock)
+                //lock (s_Lock)
                 {
                     if (s_Instance == null)
                     {
@@ -46,24 +46,27 @@ namespace DYTA.Audio
 
         public void Begin()
         {
-            if (m_Thread == null)
+            //if (m_Thread == null)
             {
                 m_Thread = new System.Threading.Thread(() =>
                 {
                     while (m_IsPlaying)
                     {
-                        if (m_UnitQueue.Count > 0)
+                        lock (s_Lock)
                         {
-                            var unit = m_UnitQueue.Dequeue();
-
-                            if (!unit.IsMute)
-                                Console.Beep(unit.Frequency, unit.Duration);
-                            else
-                                System.Threading.Thread.Sleep(unit.Duration);
-
-                            if (m_UnitQueue.Count == 0)
+                            if (m_UnitQueue.Count > 0)
                             {
-                                OnQueueEmptied.Invoke();
+                                var unit = m_UnitQueue.Dequeue();
+
+                                if (!unit.IsMute)
+                                    Console.Beep(unit.Frequency, unit.Duration);
+                                else
+                                    System.Threading.Thread.Sleep(unit.Duration);
+
+                                if (m_UnitQueue.Count == 0)
+                                {
+                                    OnQueueEmptied.Invoke();
+                                }
                             }
                         }
                     }
@@ -77,21 +80,36 @@ namespace DYTA.Audio
         public void End()
         {
             m_IsPlaying = false;
+            StopAllAudio();
         }
 
         public void Beep(int fre, int dur)
         {
             BeepUnit unit = new BeepUnit();
             unit.Frequency = fre; unit.Duration = (int)(dur);
-            m_UnitQueue.Enqueue(unit);
+            lock (s_Lock)
+            {
+                m_UnitQueue.Enqueue(unit);
+            }
         }
 
-        public void Sleep(int dur)
+        public void Delay(int dur)
         {
             BeepUnit unit = new BeepUnit();
             unit.IsMute = true;
             unit.Duration = (int)(dur);
-            m_UnitQueue.Enqueue(unit);
+            lock (s_Lock)
+            {
+                m_UnitQueue.Enqueue(unit);
+            }
+        }
+
+        public void StopAllAudio()
+        {
+            lock (s_Lock)
+            {
+                m_UnitQueue.Clear();
+            }
         }
     }
 }

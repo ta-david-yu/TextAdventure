@@ -11,12 +11,23 @@ namespace Sandbox
 {
     public class TextAdventureApp : ApplicationBase
     {
+        public enum Scene
+        {
+            MainMenu,
+            InGame
+        }
+
+        private Scene m_CurrScene = Scene.MainMenu;
+
         private TextBox m_NameTxt;
+
+        private float m_TextMoveCount = 0.2f;
 
         public TextAdventureApp(RectInt bounds, PixelColor color) : base(bounds, color)
         {
         }
 
+        #region Override
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
         {
             if (keyInfo.Key == ConsoleKey.Escape)
@@ -26,6 +37,16 @@ namespace Sandbox
             }
             else
             {
+                if (keyInfo.Key == ConsoleKey.NumPad0)
+                {
+                    loadScene(loadMainMenu);
+                }
+                else if (keyInfo.Key == ConsoleKey.NumPad1)
+                {
+                    loadScene(loadInGame);
+                }
+
+                /*
                 // TODO: Event System
                 if (keyInfo.Key == ConsoleKey.Backspace)
                 {
@@ -42,12 +63,52 @@ namespace Sandbox
                 {
                     m_NameTxt.text += keyInfo.KeyChar;
                 }
+                */
             }
         }
 
-        protected override void initialSetup()
+        protected override void loadInitialScene()
         {
-            playBgm();
+            loadMainMenu();
+        }
+
+        protected override void logicUpdate(long timeStep)
+        {
+            float second = timeStep / 1000.0f;
+            // TODO
+            if (m_CurrScene == Scene.MainMenu)
+            {
+                m_TextMoveCount -= second;
+
+                if (m_TextMoveCount < 0)
+                {
+
+                    m_NameTxt.Node.Translate(new Vector2Int(1, 1));
+                    m_TextMoveCount = 0.2f;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Scene
+
+        private void loadMainMenu()
+        {
+            m_CurrScene = Scene.MainMenu;
+
+            playSpaceOddity();
+
+            var textNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 90, 1), null, "Text");
+            m_NameTxt = textNode.AddUIComponent<TextBox>();
+            m_NameTxt.text = "Main Menu";
+            m_NameTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            m_NameTxt.verticalAlignment = TextBox.VerticalAlignment.Middle;
+        }
+
+        private void loadInGame()
+        {
+            m_CurrScene = Scene.InGame;
 
             ////
             var bitmapNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 2, 22, 30), null, "Bitmap");
@@ -70,12 +131,9 @@ namespace Sandbox
             m_NameTxt.horizontalAlignment = TextBox.HorizontalAlignment.Left;
         }
 
-        protected override void logicUpdate(long timeStep)
-        {
-            // TODO
-        }
+        #endregion
 
-        private void playBgm()
+        private void playSpaceOddity()
         {
             #region Audio
 
@@ -87,13 +145,13 @@ namespace Sandbox
             AudioManager.Instance.Beep(523, 200); // DO
             AudioManager.Instance.Beep(494, 600); // SI
 
-            AudioManager.Instance.Sleep(1200);
+            AudioManager.Instance.Delay(1200);
 
             AudioManager.Instance.Beep(440, 800); // LA
             AudioManager.Instance.Beep(392, 800); // SO
             AudioManager.Instance.Beep(523, 800); // DO
 
-            AudioManager.Instance.Sleep(100);
+            AudioManager.Instance.Delay(100);
 
             AudioManager.Instance.Beep(523, 400); // DO
             AudioManager.Instance.Beep(523, 200); // DO
@@ -103,7 +161,7 @@ namespace Sandbox
             AudioManager.Instance.Beep(523, 200); // DO
             AudioManager.Instance.Beep(494, 600); // SI
 
-            AudioManager.Instance.Sleep(4000);
+            AudioManager.Instance.Delay(4000);
 
             AudioManager.Instance.Beep(523, 400); // DO
             AudioManager.Instance.Beep(587, 400); // RE
@@ -117,7 +175,7 @@ namespace Sandbox
             AudioManager.Instance.Beep(587, 200); // RE
             AudioManager.Instance.Beep(587, 1200); // RE
 
-            AudioManager.Instance.Sleep(800);
+            AudioManager.Instance.Delay(800);
 
             // Elevate
             int initial = 300;
@@ -140,7 +198,7 @@ namespace Sandbox
             initial += increment;
             AudioManager.Instance.Beep(initial, 3200); // RE
 
-            AudioManager.Instance.Sleep(800);
+            AudioManager.Instance.Delay(800);
 
             AudioManager.Instance.Beep(392, 200); // SO
             AudioManager.Instance.Beep(392, 600); // SO
@@ -152,7 +210,7 @@ namespace Sandbox
             AudioManager.Instance.Beep(523, 400); // DO
             AudioManager.Instance.Beep(494, 600); // SI
 
-            AudioManager.Instance.Sleep(800);
+            AudioManager.Instance.Delay(800);
 
             AudioManager.Instance.Beep(494, 400); // SI
             AudioManager.Instance.Beep(659, 400); // MI
@@ -164,6 +222,7 @@ namespace Sandbox
             AudioManager.Instance.Beep(440, 600); // LA
 
             // .. and the papers want to know whose shirts you wear
+
 
             AudioManager.Instance.Begin();
             #endregion

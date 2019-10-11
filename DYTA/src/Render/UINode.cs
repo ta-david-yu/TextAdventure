@@ -51,7 +51,7 @@ namespace DYTA.Render
             }
 
             public bool IsDelayedCleanup { get; private set; } = false;
-            private int m_NodeIdCounter = 0;
+            public int NodeIdCounter { get; private set; } = 0;
 
             public UINode RootNode { get; private set; }
 
@@ -64,8 +64,9 @@ namespace DYTA.Render
 
             private void init(Math.RectInt mainBounds, PixelColor color)
             {
-                RootNode = new UINode(m_NodeIdCounter, mainBounds, "Root");
-                m_NodeIdCounter = 0;
+                NodeIdCounter = 0;
+                RootNode = new UINode(NodeIdCounter, mainBounds, "Root");
+                NodeIdCounter++;
 
                 RootCanvas = RootNode.AddUIComponent<SingleColorCanvas>();
                 RootCanvas.CanvasPixelColor = color;
@@ -75,8 +76,8 @@ namespace DYTA.Render
 
             public UINode CreateNode(Math.RectInt nodeBounds, UINode parent = null, string name = "")
             {
-                var node = new UINode(m_NodeIdCounter, nodeBounds, name);
-                m_NodeIdCounter += 1;
+                var node = new UINode(NodeIdCounter, nodeBounds, name);
+                NodeIdCounter += 1;
 
                 node.setParent(parent);
                 return node;
@@ -124,7 +125,7 @@ namespace DYTA.Render
                         node.RenderUIs();
                         dirtyCanvases.Add(node.ParentCanvas);
 
-                        Console.SetCursorPosition(0, UINode.Engine.Instance.RootNode.Bounds.Size.Y + index + m_NodeIdCounter + 1);
+                        Console.SetCursorPosition(0, UINode.Engine.Instance.RootNode.Bounds.Size.Y + index + NodeIdCounter + 1);
 
                         var info = string.Empty;
                         info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
@@ -143,7 +144,9 @@ namespace DYTA.Render
 
             public void Destruction()
             {
-                init(RootNode.Bounds, RootCanvas.CanvasPixelColor);
+                var color = new PixelColor(RootCanvas.CanvasPixelColor.BackgroundColor, RootCanvas.CanvasPixelColor.ForegroundColor);
+                var bounds = RootNode.Bounds;
+                init(bounds, color);
                 IsDelayedCleanup = false;
             }
 

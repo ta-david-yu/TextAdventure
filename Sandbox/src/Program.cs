@@ -12,7 +12,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var app = new TextAdventureApp(new DYTA.Math.RectInt(0, 0, 95, 34), new PixelColor(ConsoleColor.Black, ConsoleColor.White));
+            var app = new TextAdventureApp(new DYTA.Math.RectInt(0, 0, 95, 34), new PixelColor(ConsoleColor.DarkCyan, ConsoleColor.White));
 
             app.Run();
         }
