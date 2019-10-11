@@ -37,6 +37,9 @@ namespace Sandbox
 
         private int m_CurrMenuSelection = 0;
 
+        private int m_MenuOptionAnchor = 2;
+        private int m_MenuOptionOffset = 4;
+
         #endregion
 
         #region InGame Var
@@ -136,13 +139,12 @@ namespace Sandbox
 
             #region MainMenuOption
 
-            int menuAnchor = 13;
-
             /// Main Menu Node
-            m_MainMenuNode = UINode.Engine.Instance.CreateNode(new RectInt(60, 0, 32, 35));
+            m_MainMenuNode = UINode.Engine.Instance.CreateNode(new RectInt(60, 12, 32, 25));
+            m_MainMenuNode.AddUIComponent<SingleColorCanvas>();
 
             ////
-            var txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, menuAnchor, 30, 3), m_MainMenuNode, "Text0-Canvas");
+            var txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, m_MenuOptionAnchor, 28, 3), m_MainMenuNode, "Text0-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
             m_MainOptionCanvases.Add(canvas);
@@ -154,7 +156,7 @@ namespace Sandbox
             m_NewGameText.verticalAlignment = TextBox.VerticalAlignment.Top;
 
             ////
-            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, menuAnchor + 4, 30, 3), m_MainMenuNode, "Text1-Canvas");
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, m_MenuOptionAnchor + m_MenuOptionOffset, 28, 3), m_MainMenuNode, "Text1-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
             m_MainOptionCanvases.Add(canvas);
@@ -166,7 +168,7 @@ namespace Sandbox
             m_LoadGameText.verticalAlignment = TextBox.VerticalAlignment.Top;
 
             ////
-            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, menuAnchor + 8, 30, 3), m_MainMenuNode, "Text2-Canvas");
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, m_MenuOptionAnchor + m_MenuOptionOffset * 2, 28, 3), m_MainMenuNode, "Text2-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
             m_MainOptionCanvases.Add(canvas);
@@ -178,7 +180,7 @@ namespace Sandbox
             m_ExitText.verticalAlignment = TextBox.VerticalAlignment.Top;
 
             //
-            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, menuAnchor + 11, 30, 3), m_MainMenuNode, "Hint-Canvas");
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, m_MenuOptionAnchor + 11, 30, 3), m_MainMenuNode, "Hint-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
 
             var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1, 23, 1), txtCanNode, "Text");
@@ -188,7 +190,7 @@ namespace Sandbox
             hintTxt.verticalAlignment = TextBox.VerticalAlignment.Top;
 
             //
-            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, menuAnchor + 14, 30, 3), m_MainMenuNode, "Hint-Canvas");
+            txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, m_MenuOptionAnchor + 14, 30, 3), m_MainMenuNode, "Hint-Canvas");
             canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkRed);
 
@@ -336,10 +338,14 @@ namespace Sandbox
                 var canvas = m_MainOptionCanvases[i];
                 if (i == id)
                 {
+                    var pos = new Vector2Int(1, m_MenuOptionAnchor + m_MenuOptionOffset * i);
+                    canvas.Node.SetPosition(pos);
                     canvas.CanvasPixelColor = new PixelColor(ConsoleColor.White, ConsoleColor.Black);
                 }
                 else
                 {
+                    var pos = new Vector2Int(2, m_MenuOptionAnchor + m_MenuOptionOffset * i);
+                    canvas.Node.SetPosition(pos);
                     canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.Black);
                 }
             }
