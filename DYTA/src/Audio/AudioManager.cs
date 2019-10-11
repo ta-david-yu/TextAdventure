@@ -46,16 +46,21 @@ namespace DYTA.Audio
 
         public void Begin()
         {
+            if (m_Thread == null)
             {
                 m_Thread = new System.Threading.Thread(() =>
                 {
-                    while (m_IsPlaying)
+                    while (true)
                     {
-                        lock (s_Lock)
+                        if (m_IsPlaying)
                         {
                             if (m_UnitQueue.Count > 0)
                             {
-                                var unit = m_UnitQueue.Dequeue();
+                                BeepUnit unit;
+                                lock (s_Lock)
+                                {
+                                    unit = m_UnitQueue.Dequeue();
+                                }
 
                                 if (!unit.IsMute)
                                     Console.Beep(unit.Frequency, unit.Duration);
@@ -73,6 +78,7 @@ namespace DYTA.Audio
                 m_Thread.IsBackground = true;
                 m_Thread.Start();
             }
+
             m_IsPlaying = true;
         }
 

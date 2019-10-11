@@ -19,6 +19,7 @@ namespace DYTA.Render
             set
             {
                 m_CanvasPixelColor = value;
+                IsDirty = true;
                 ResetBuffer();
             }
         }

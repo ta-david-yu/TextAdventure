@@ -221,7 +221,16 @@ namespace DYTA.Render
 
         public RectInt Bounds { get; private set; }
 
-        public bool IsActive { get; set; } = true;
+        private bool m_IsActive = true;
+        public bool IsActive
+        {
+            get { return m_IsActive; }
+            set
+            {
+                m_IsActive = value;
+                SetDirty();
+            }
+        }
 
         private List<UINode> m_Children = new List<UINode>();
         public ReadOnlyCollection<UINode> Children { get { return m_Children.AsReadOnly(); } }
