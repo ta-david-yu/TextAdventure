@@ -70,12 +70,12 @@ namespace DYTA
                 }
 
                 // logging
-                //FrameLogger.Update();
+                FrameLogger.DrawFrameLog();
 
                 // scene loading
                 if (WillChangeScene)
                 {
-                    Console.SetCursorPosition(0, 0);
+                    Console.SetCursorPosition(0, UINode.Engine.Instance.RootNode.Bounds.Min.Y + 0);
                     Console.WriteLine("LOADING......");
 
                     WillChangeScene = false;

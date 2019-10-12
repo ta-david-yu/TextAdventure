@@ -13,9 +13,9 @@ namespace Sandbox
         static void Main(string[] args)
         {
             Console.CursorVisible = false;
-            Console.SetWindowSize(100, 55);
+            Console.SetWindowSize(100, 60);
 
-            var app = new TextAdventureApp(new DYTA.Math.RectInt(0, 0, 95, 35), new PixelColor(ConsoleColor.Black, ConsoleColor.White));
+            var app = new TextAdventureApp(new DYTA.Math.RectInt(0, 0, 95, 37), new PixelColor(ConsoleColor.Black, ConsoleColor.White));
 
             app.Run();
 

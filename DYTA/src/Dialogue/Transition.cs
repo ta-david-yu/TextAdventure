@@ -12,6 +12,12 @@ namespace DYTA.Dialogue
         public string TargetSituationName { get; set; } = "TargetSituationName";
 
         [DataMember]
+        public bool HasOnFialSituation { get; set; } = false;
+
+        [DataMember]
+        public string OnFailSituationName { get; set; } = "FailSituationName";
+ 
+        [DataMember]
         public string OnFailDescription { get; set; } = "OnFailDescription";
 
         [DataMember]

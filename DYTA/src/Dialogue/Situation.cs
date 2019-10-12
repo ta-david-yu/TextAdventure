@@ -19,7 +19,7 @@ namespace DYTA.Dialogue
 
         [DataMember]
         // cmd -> trans
-        public Dictionary<string, Transition> SituationTransitions { get; set; } = new Dictionary<string, Transition>();
+        public Dictionary<string, Transition> SituationTransitions { get; set; } = new Dictionary<string, Transition>(StringComparer.OrdinalIgnoreCase);
 
         [DataMember]
         // action when reach this situation the first time

@@ -54,6 +54,7 @@ namespace Sandbox
 
         #region InGame Var
 
+        private TextBox m_LocationTxt;
         private TextBox m_DesciptionTxt;
         private TextBox m_InputFieldTxt;
         private TextBox m_PromptText;
@@ -119,6 +120,7 @@ namespace Sandbox
                 }
                 else if (keyInfo.Key == ConsoleKey.Enter)
                 {
+                    m_RespondText.text = string.Empty;
                     executeCommand(m_CommandString.ToString());
                     m_CommandString.Length = 0;
                 }
@@ -163,6 +165,22 @@ namespace Sandbox
             }
             else if (m_CurrScene == Scene.InGame)
             {
+                foreach (var trans in DialogueSystem.Instance.CurrentSituation.SituationTransitions)
+                {
+                    StringBuilder info = new StringBuilder();
+                    info.Append(string.Format("{0, -15} -> {1, 15}", trans.Key, trans.Value.TargetSituationName));
+                    FrameLogger.Log(info.ToString());
+                }
+
+                FrameLogger.Log("");
+
+                foreach (var variable in DialogueSystem.Instance.GlobalVariables)
+                {
+                    StringBuilder info = new StringBuilder();
+                    info.Append(string.Format("({0, -9}={1, 3:D3})", variable.Key, variable.Value));
+                    FrameLogger.Log(info.ToString());
+                }
+
                 // Cursor Update
                 if (m_CommandString.Length >= c_InputFieldMaxLength)
                 {
@@ -296,7 +314,7 @@ namespace Sandbox
 
         private void enterInGame()
         {
-            //DYTA.Dialogue.DialogueSystem.Instance.debug();
+            //DialogueSystem.Instance.debug();
 
             m_CurrScene = Scene.InGame;
 
@@ -317,6 +335,11 @@ namespace Sandbox
                 locationTitle.horizontalAlignment = TextBox.HorizontalAlignment.Center;
                 locationTitle.verticalAlignment = TextBox.VerticalAlignment.Top;
                 locationTitle.text = "[ LOCATION ]";
+
+                var locationNameNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 22, 30), locationNode, "LocationName");
+                m_LocationTxt = locationNameNode.AddUIComponent<TextBox>();
+                m_LocationTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+                m_LocationTxt.verticalAlignment = TextBox.VerticalAlignment.Middle;
 
                 //// Description
                 var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 24), null, "Descr-Canvas");
@@ -382,7 +405,7 @@ namespace Sandbox
             }
 
             // Setup Dialogue Machine
-            DialogueSystem.Instance.CreateDialogueTreeFromFile("./test.json");
+            DialogueSystem.Instance.CreateDialogueTreeFromFile("./SpaceBoy.json");
 
             DialogueSystem.Instance.OnEnterSituation += handleOnSituationChanged;
             DialogueSystem.Instance.OnTransitionFailed += handleOnTransitionFailed;
@@ -391,11 +414,11 @@ namespace Sandbox
             // load save file if there's one, or flag is set
             if (m_LoadSaveFile)
             {
-                DialogueSystem.Instance.Load("SIT-02", new Dictionary<string, int>(), new HashSet<string>());
+                DialogueSystem.Instance.Load("FirstVessel", new Dictionary<string, int>(), new HashSet<string>());
             }
             else
             {
-                DialogueSystem.Instance.Load("SIT-00", new Dictionary<string, int>(), new HashSet<string>());
+                DialogueSystem.Instance.Load("FirstVessel", new Dictionary<string, int>(), new HashSet<string>());
             }
         }
 
@@ -560,6 +583,9 @@ namespace Sandbox
         {
             var nextSit = DialogueSystem.Instance.Tree.SituationTables[nextSitName];
 
+            // TODO: load image to replace
+            m_LocationTxt.text = nextSit.LocationName;
+
             if (DialogueSystem.Instance.VisitedSituation.Contains(nextSitName))
             {
                 m_DesciptionTxt.text = nextSit.Description;
@@ -572,7 +598,10 @@ namespace Sandbox
 
         private void handleOnTransitionFailed(Transition trans)
         {
-            m_RespondText.text = trans.OnFailDescription;
+            if (!trans.HasOnFialSituation)
+            {
+                m_RespondText.text = trans.OnFailDescription;
+            }
         }
 
         private void handleOnExecuteInvalidCommand(string cmd)

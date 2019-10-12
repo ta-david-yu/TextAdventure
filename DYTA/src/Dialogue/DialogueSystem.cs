@@ -31,8 +31,8 @@ namespace DYTA.Dialogue
 
         public DialogueTree Tree { get; private set; }
 
-        private string m_CurrSitName = "";
-        private Situation m_CurrentSituation;
+        private string m_CurrSitName = string.Empty;
+        private Situation m_CurrentSituation = null;
         public Situation CurrentSituation 
         { 
             get
@@ -77,6 +77,7 @@ namespace DYTA.Dialogue
         public void ExecuteCommand(string actionName)
         {
             Transition trans = null;
+            CurrentSituation.SituationTransitions = new Dictionary<string, Transition>(CurrentSituation.SituationTransitions, StringComparer.OrdinalIgnoreCase);
             if (CurrentSituation.SituationTransitions.TryGetValue(actionName, out trans))
             {
                 // success
@@ -88,6 +89,11 @@ namespace DYTA.Dialogue
                 // failed
                 else
                 {
+                    if (trans.HasOnFialSituation)
+                    {
+                        EnterSituation(trans.OnFailSituationName);
+                    }
+
                     OnTransitionFailed.Invoke(trans);
                 }
             }
@@ -100,9 +106,13 @@ namespace DYTA.Dialogue
         private void EnterSituation(string sitName)
         {
             // setup variable, setup one time var, always var
-            CurrentSituation = Tree.SituationTables[sitName];
-            OnEnterSituation.Invoke(m_CurrSitName, sitName);
+            var prevSitName = m_CurrSitName;
+
             m_CurrSitName = sitName;
+            CurrentSituation = Tree.SituationTables[sitName];
+
+            ////
+            OnEnterSituation.Invoke(prevSitName, sitName);
 
             // the first time
             if (!VisitedSituation.Contains(sitName))
@@ -110,17 +120,32 @@ namespace DYTA.Dialogue
                 VisitedSituation.Add(sitName);
 
                 // execute one time event
-                foreach (var action in CurrentSituation.OneTimeSetValueAction)
+                try
+                {
+                    foreach (var action in CurrentSituation.OneTimeSetValueAction)
+                    {
+                        action.Operate();
+                    }
+                }
+                catch (Exception ep)
+                {
+                    FrameLogger.LogError(ep.Message + ": " + ep.StackTrace);
+                }
+            }
+
+            try
+            {
+                // execute always event
+                foreach (var action in CurrentSituation.AlwaysSetValueAction)
                 {
                     action.Operate();
                 }
             }
-
-            // execute always event
-            foreach (var action in CurrentSituation.AlwaysSetValueAction)
+            catch (Exception ep)
             {
-                action.Operate();
+                FrameLogger.LogError(ep.Message + ": " + ep.StackTrace);
             }
+
         }
 
         public int GetVariableValue(string variableName)
@@ -150,7 +175,7 @@ namespace DYTA.Dialogue
         }
 
 
-        /*
+        
         public void debug()
         {
             Tree = new DialogueTree();
@@ -168,8 +193,13 @@ namespace DYTA.Dialogue
 
             var tran0 = new Transition();
             tran0.TargetSituationName = "SIT-01";
-            tran0.OnFailDescription = "TRAN-00-FD";
+            tran0.HasOnFialSituation = true;
+            tran0.OnFailSituationName = "SIT-02";
             tran0.Conditions = new List<VariableCondition>();
+            var condition = new VariableCondition();
+            condition.VariableName = "VAR-VEM";
+            condition.ComparisonValue = 12;
+            tran0.Conditions.Add(condition);
 
             var tran1 = new Transition();
             tran1.TargetSituationName = "SIT-02";
@@ -205,6 +235,6 @@ namespace DYTA.Dialogue
 
             stream.Close();
         }
-        */
+        
     }
 }
