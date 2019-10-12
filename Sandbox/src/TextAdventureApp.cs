@@ -63,6 +63,8 @@ namespace Sandbox
         private StringBuilder m_CommandString = new StringBuilder("");
         private float m_CursorFlickringTimer = 0;
 
+        private bool m_LoadSaveFile = false;
+
         private const float c_CursorFlickringDuration = 0.4f;
         private const int c_InputFieldMaxLength = 58;
         private static readonly Vector2Int c_CursorAnchor = new Vector2Int(5, 2);
@@ -227,11 +229,11 @@ namespace Sandbox
                 m_MainMenuNode.AddUIComponent<SingleColorCanvas>();
 
                 ////
-                var txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor, 28, 3), m_MainMenuNode, "Text0-Canvas");
-                canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+                var txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(3, c_MenuOptionAnchor, 28, 3), m_MainMenuNode, "Text0-Canvas");
+                canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
                 canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
-                var newGameNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanNode, "NEW");
+                var newGameNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanvasNode, "NEW");
                 m_NewGameText = newGameNode.AddUIComponent<TextBox>();
                 m_NewGameText.text = "NEW ADVENTURE";
                 m_NewGameText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
@@ -240,11 +242,11 @@ namespace Sandbox
                 m_MainOptionTextes.Add(m_NewGameText);
 
                 ////
-                txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + c_MenuOptionOffset, 28, 3), m_MainMenuNode, "Text1-Canvas");
-                canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+                txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(3, c_MenuOptionAnchor + c_MenuOptionOffset, 28, 3), m_MainMenuNode, "Text1-Canvas");
+                canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
                 canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
-                var loadGameNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanNode, "CONT");
+                var loadGameNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanvasNode, "CONT");
                 m_LoadGameText = loadGameNode.AddUIComponent<TextBox>();
                 m_LoadGameText.text = "CONTINUE";
                 m_LoadGameText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
@@ -253,11 +255,11 @@ namespace Sandbox
                 m_MainOptionTextes.Add(m_LoadGameText);
 
                 ////
-                txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + c_MenuOptionOffset * 2, 28, 3), m_MainMenuNode, "Text2-Canvas");
-                canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+                txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(3, c_MenuOptionAnchor + c_MenuOptionOffset * 2, 28, 3), m_MainMenuNode, "Text2-Canvas");
+                canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
                 canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
-                var exitNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanNode, "EXIT");
+                var exitNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanvasNode, "EXIT");
                 m_ExitText = exitNode.AddUIComponent<TextBox>();
                 m_ExitText.text = "EXIT";
                 m_ExitText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
@@ -266,22 +268,22 @@ namespace Sandbox
                 m_MainOptionTextes.Add(m_ExitText);
 
                 // - Hint
-                txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, c_MenuOptionAnchor + 9, 30, 3), m_MainMenuNode, "Hint-Canvas");
-                canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+                txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + 9, 30, 3), m_MainMenuNode, "Hint-Canvas");
+                canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
                 canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkRed);
 
-                var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 1, 23, 1), txtCanNode, "HINT");
+                var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 1, 23, 1), txtCanvasNode, "HINT");
                 var hintTxt = hintNode.AddUIComponent<TextBox>();
                 hintTxt.text = "arrows-select\nenter-confirm";
                 hintTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
                 hintTxt.verticalAlignment = TextBox.VerticalAlignment.Top;
 
                 //
-                txtCanNode = UINode.Engine.Instance.CreateNode(new RectInt(1, c_MenuOptionAnchor + 12, 30, 3), m_MainMenuNode, "Hint-Canvas");
-                canvas = txtCanNode.AddUIComponent<SingleColorCanvas>();
+                txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + 12, 30, 3), m_MainMenuNode, "Hint-Canvas");
+                canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
                 canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkRed);
 
-                hintNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 1, 23, 1), txtCanNode, "MUSIC");
+                hintNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 1, 23, 1), txtCanvasNode, "MUSIC");
                 hintTxt = hintNode.AddUIComponent<TextBox>();
                 hintTxt.text = "MUSIC - SPACE ODDITY";
                 hintTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
@@ -387,7 +389,14 @@ namespace Sandbox
             DialogueSystem.Instance.OnExecuteInvalidCommand += handleOnExecuteInvalidCommand;
 
             // load save file if there's one, or flag is set
-            DialogueSystem.Instance.Load("SIT-00", new Dictionary<string, int>(), new HashSet<string>());
+            if (m_LoadSaveFile)
+            {
+                DialogueSystem.Instance.Load("SIT-02", new Dictionary<string, int>(), new HashSet<string>());
+            }
+            else
+            {
+                DialogueSystem.Instance.Load("SIT-00", new Dictionary<string, int>(), new HashSet<string>());
+            }
         }
 
         private void exitMainMenu()
@@ -526,9 +535,11 @@ namespace Sandbox
             switch (m_CurrMenuSelection)
             {
                 case 0:
+                    m_LoadSaveFile = false;
                     loadScene(enterInGame, exitInGame);
                     break;
                 case 1:
+                    m_LoadSaveFile = true;
                     loadScene(enterInGame, exitInGame);
                     break;
                 case 2:
