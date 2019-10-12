@@ -54,18 +54,34 @@ namespace Sandbox
 
         #region InGame Var
 
+        enum InGameState
+        {
+            ShowDescription,
+            WaitingInput,
+
+            Animation
+        }
+
+        #region Reference
         private TextBox m_LocationTxt;
         private TextBox m_DesciptionTxt;
         private TextBox m_InputFieldTxt;
         private TextBox m_PromptText;
         private UnlitBox m_CursorText;
         private TextBox m_RespondText;
+        #endregion
+
+        private InGameState m_InGameState = InGameState.ShowDescription;
+        private string m_DescriptionBuffer = string.Empty;
+
+        private float m_DescriptionTextTimer = 0;
 
         private StringBuilder m_CommandString = new StringBuilder("");
-        private float m_CursorFlickringTimer = 0;
 
+        private float m_CursorFlickringTimer = 0;
         private bool m_LoadSaveFile = false;
 
+        private const float c_DescrTextDuration = 0.02f;
         private const float c_CursorFlickringDuration = 0.4f;
         private const int c_InputFieldMaxLength = 58;
         private static readonly Vector2Int c_CursorAnchor = new Vector2Int(5, 2);
@@ -78,6 +94,11 @@ namespace Sandbox
         }
 
         #region Override
+        protected override void loadInitialScene()
+        {
+            enterMainMenu();
+        }
+
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
         {
             if (m_CurrScene == Scene.MainMenu)
@@ -89,19 +110,16 @@ namespace Sandbox
                 else if (keyInfo.Key == ConsoleKey.UpArrow)
                 {
                     m_CurrMenuSelection = (m_CurrMenuSelection - 1 < 0) ? m_MainOptionTextes.Count - 1 : m_CurrMenuSelection - 1;
-                    //AudioManager.Instance.BeepSfx(300, 100);
                     selectMainMenuOption(m_CurrMenuSelection);
                 }
                 else if (keyInfo.Key == ConsoleKey.DownArrow)
                 {
                     m_CurrMenuSelection = (m_CurrMenuSelection + 1 > m_MainOptionTextes.Count - 1) ? 0 : m_CurrMenuSelection + 1;
-                    //AudioManager.Instance.BeepSfx(300, 100);
                     selectMainMenuOption(m_CurrMenuSelection);
                 }
                 else if (keyInfo.Key == ConsoleKey.Enter)
                 {
                     confirmMainMenuOption();
-                    //AudioManager.Instance.BeepSfx(550, 100);
                 }
             }
             else if (m_CurrScene == Scene.InGame)
@@ -110,33 +128,58 @@ namespace Sandbox
                 {
                     loadScene(enterMainMenu, exitMainMenu);
                 }
-
-                if (keyInfo.Key == ConsoleKey.Backspace)
-                {
-                    if (m_CommandString.Length > 0)
-                    {
-                        m_CommandString.Length--;
-                    }
-                }
-                else if (keyInfo.Key == ConsoleKey.Enter)
-                {
-                    m_RespondText.text = string.Empty;
-                    executeCommand(m_CommandString.ToString());
-                    m_CommandString.Length = 0;
-                }
                 else
                 {
-                    if (m_CommandString.Length < c_InputFieldMaxLength)
-                        m_CommandString.Append(keyInfo.KeyChar);
-                }
-                m_InputFieldTxt.text = m_CommandString.ToString();
-                m_CursorText.Node.SetPosition(c_CursorAnchor + new Vector2Int(m_CommandString.Length, 0));
-            }
-        }
 
-        protected override void loadInitialScene()
-        {
-            enterMainMenu();
+                    switch (m_InGameState)
+                    {
+                        case InGameState.ShowDescription:
+                            if (keyInfo.Key == ConsoleKey.Enter)
+                            {
+                                m_DesciptionTxt.text = m_DescriptionBuffer;
+                                AudioManager.Instance.StopAllAudio();
+                            }
+                            break;
+                        case InGameState.WaitingInput:
+
+                            if (keyInfo.Key == ConsoleKey.Backspace)
+                            {
+                                if (m_CommandString.Length > 0)
+                                {
+                                    m_CommandString.Length--;
+                                    AudioManager.Instance.BeepMusic(80, 20);
+                                }
+                            }
+                            else if (keyInfo.Key == ConsoleKey.Enter)
+                            {
+                                m_RespondText.text = string.Empty;
+                                executeCommand(m_CommandString.ToString());
+                                m_CommandString.Length = 0;
+                                AudioManager.Instance.BeepMusic(350, 20);
+                            }
+                            else
+                            {
+                                if (m_CommandString.Length == 0)
+                                {
+                                    // cleanup respond text
+                                    m_RespondText.text = string.Empty;
+                                }
+
+                                if (m_CommandString.Length < c_InputFieldMaxLength)
+                                {
+                                    m_CommandString.Append(keyInfo.KeyChar);
+                                    AudioManager.Instance.BeepMusic(150, 20);
+                                }
+                            }
+                            m_InputFieldTxt.text = m_CommandString.ToString();
+                            m_CursorText.Node.SetPosition(c_CursorAnchor + new Vector2Int(m_CommandString.Length, 0));
+
+                            break;
+                        case InGameState.Animation:
+                            break;
+                    }
+                }
+            }
         }
 
         protected override void update(long timeStep)
@@ -165,6 +208,7 @@ namespace Sandbox
             }
             else if (m_CurrScene == Scene.InGame)
             {
+                #region Debug
                 foreach (var trans in DialogueSystem.Instance.CurrentSituation.SituationTransitions)
                 {
                     StringBuilder info = new StringBuilder();
@@ -173,6 +217,7 @@ namespace Sandbox
                 }
 
                 FrameLogger.Log("");
+                #endregion
 
                 foreach (var variable in DialogueSystem.Instance.GlobalVariables)
                 {
@@ -181,19 +226,50 @@ namespace Sandbox
                     FrameLogger.Log(info.ToString());
                 }
 
-                // Cursor Update
-                if (m_CommandString.Length >= c_InputFieldMaxLength)
+                switch (m_InGameState)
                 {
-                    m_CursorText.Node.IsActive = false;
-                }
-                else
-                {
-                    m_CursorFlickringTimer += second;
-                    if (m_CursorFlickringTimer > c_CursorFlickringDuration)
-                    {
-                        m_CursorFlickringTimer = 0;
-                        m_CursorText.Node.IsActive = !m_CursorText.Node.IsActive;
-                    }
+                    case InGameState.ShowDescription:
+                        m_DescriptionTextTimer += second;
+                        if (m_DescriptionBuffer.Length > m_DesciptionTxt.text.Length)
+                        {
+                            if (m_DescriptionTextTimer > c_DescrTextDuration)
+                            {
+
+
+                                var nextChar = m_DescriptionBuffer[m_DesciptionTxt.text.Length];
+
+                                if (m_DesciptionTxt.text.Length == 0 || (m_DescriptionBuffer[m_DesciptionTxt.text.Length - 1] != '\n' && nextChar == '\n'))
+                                {
+                                    AudioManager.Instance.BeepMusic(300, 150);
+                                }
+                                m_DesciptionTxt.text += nextChar;
+                            }
+                        }
+                        else
+                        {
+                            m_InGameState = InGameState.WaitingInput;
+                            m_PromptText.Node.IsActive = true;
+                        }
+                        break;
+                    case InGameState.WaitingInput:
+                        // Cursor Update
+                        if (m_CommandString.Length >= c_InputFieldMaxLength)
+                        {
+                            m_CursorText.Node.IsActive = false;
+                        }
+                        else
+                        {
+                            m_CursorFlickringTimer += second;
+                            if (m_CursorFlickringTimer > c_CursorFlickringDuration)
+                            {
+                                m_CursorFlickringTimer = 0;
+                                m_CursorText.Node.IsActive = !m_CursorText.Node.IsActive;
+                            }
+                        }
+
+                        break;
+                    case InGameState.Animation:
+                        break;
                 }
             }
         }
@@ -342,12 +418,12 @@ namespace Sandbox
                 m_LocationTxt.verticalAlignment = TextBox.VerticalAlignment.Middle;
 
                 //// Description
-                var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 24), null, "Descr-Canvas");
+                var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 30), null, "Descr-Canvas");
                 var descriptionCanvas = descriptionNode.AddUIComponent<SingleColorCanvas>();
                 descriptionCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.White);
 
                 // 
-                var descriptionLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 25), descriptionNode, "Layout-Canvas");
+                var descriptionLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 30), descriptionNode, "Layout-Canvas");
                 var descriptionLayout = descriptionLayoutNode.AddUIComponent<Bitmap>();
                 descriptionLayout.LoadFromFile("./Assets/LocationLayout.txt", Bitmap.DrawType.Sliced);
 
@@ -391,7 +467,7 @@ namespace Sandbox
 
                 var inputFieldCursorNode = UINode.Engine.Instance.CreateNode(new RectInt(c_CursorAnchor, Vector2Int.One), inputFieldNode, "Cursor");
                 m_CursorText = inputFieldCursorNode.AddUIComponent<UnlitBox>();
-                m_CursorText.UnlitCharacter = '_';
+                m_CursorText.UnlitCharacter = '_';  
 
                 //// Respond
                 var respondCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 4, 63, 2), inputFieldNode, "Output-Canvas");
@@ -400,7 +476,7 @@ namespace Sandbox
 
                 var respondTxtNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 62, 2), respondCanvasNode, "Output");
                 m_RespondText = respondTxtNode.AddUIComponent<TextBox>();
-                m_RespondText.text = "This is the respond of your action, be careful about it.\nIt can overflow";
+                m_RespondText.text = "What do you want to do?";
                 m_RespondText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
             }
 
@@ -586,13 +662,18 @@ namespace Sandbox
             // TODO: load image to replace
             m_LocationTxt.text = nextSit.LocationName;
 
+            m_InGameState = InGameState.ShowDescription;
+            //m_CursorText.Node.IsActive = false;
+            //m_PromptText.Node.IsActive = false;
+
+            m_DesciptionTxt.text = string.Empty;
             if (DialogueSystem.Instance.VisitedSituation.Contains(nextSitName))
             {
-                m_DesciptionTxt.text = nextSit.Description;
+                m_DescriptionBuffer = nextSit.Description;
             }
             else
             {
-                m_DesciptionTxt.text = nextSit.FirstDescription;
+                m_DescriptionBuffer = nextSit.FirstDescription;
             }
         }
 
@@ -606,7 +687,7 @@ namespace Sandbox
 
         private void handleOnExecuteInvalidCommand(string cmd)
         {
-            m_RespondText.text = "INVALID COMMAND";
+            m_RespondText.text = "There is no way you can [" + cmd + "] now.";
         }
 
         #endregion

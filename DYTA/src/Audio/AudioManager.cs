@@ -124,6 +124,20 @@ namespace DYTA.Audio
             StopAllAudio();
         }
 
+        public void ManyBeepMusic(int fre, int dur, int count)
+        {
+            lock (s_Lock)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    BeepUnit unit = new BeepUnit();
+                    unit.Frequency = fre; unit.Duration = (int)(dur);
+
+                    m_MusicQueue.Enqueue(unit);
+                }
+            }
+        }
+
         public void BeepMusic(int fre, int dur)
         {
             BeepUnit unit = new BeepUnit();
