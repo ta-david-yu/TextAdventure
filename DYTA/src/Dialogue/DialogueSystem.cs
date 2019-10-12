@@ -27,14 +27,130 @@ namespace DYTA.Dialogue
         }
 
         public Dictionary<string, int> GlobalVariables { get; private set; }
+        public HashSet<string> VisitedSituation { get; private set; }
 
         public DialogueTree Tree { get; private set; }
+
+        private string m_CurrSitName = "";
+        private Situation m_CurrentSituation;
+        public Situation CurrentSituation 
+        { 
+            get
+            {
+                return m_CurrentSituation;
+            }
+
+            private set
+            {
+                var prev = m_CurrentSituation;
+                m_CurrentSituation = value;
+            }
+        }
+
+        public event Action<string, string> OnEnterSituation = delegate { };
+        public event Action<Transition> OnTransitionFailed = delegate { };
+        public event Action<string> OnExecuteInvalidCommand = delegate { };
 
         public DialogueSystem()
         {
             GlobalVariables = new Dictionary<string, int>();
         }
 
+
+        public void CreateDialogueTreeFromFile(string path)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(DialogueTree));
+            var stream = File.Open(path, FileMode.Open);
+
+            Tree = (DialogueTree)serializer.ReadObject(stream);
+
+            stream.Close();
+        }
+
+        public void Load(string situationName, Dictionary<string, int> variables, HashSet<string> visited)
+        {
+            GlobalVariables = variables;
+            VisitedSituation = visited;
+            EnterSituation(situationName);
+        }
+
+        public void ExecuteCommand(string actionName)
+        {
+            Transition trans = null;
+            if (CurrentSituation.SituationTransitions.TryGetValue(actionName, out trans))
+            {
+                // success
+                if (trans.IfReachConditions())
+                {
+                    // trans to situation
+                    EnterSituation(trans.TargetSituationName);
+                }
+                // failed
+                else
+                {
+                    OnTransitionFailed.Invoke(trans);
+                }
+            }
+            else
+            {
+                OnExecuteInvalidCommand.Invoke(actionName);
+            }
+        }
+
+        private void EnterSituation(string sitName)
+        {
+            // setup variable, setup one time var, always var
+            CurrentSituation = Tree.SituationTables[sitName];
+            OnEnterSituation.Invoke(m_CurrSitName, sitName);
+            m_CurrSitName = sitName;
+
+            // the first time
+            if (!VisitedSituation.Contains(sitName))
+            {
+                VisitedSituation.Add(sitName);
+
+                // execute one time event
+                foreach (var action in CurrentSituation.OneTimeSetValueAction)
+                {
+                    action.Operate();
+                }
+            }
+
+            // execute always event
+            foreach (var action in CurrentSituation.AlwaysSetValueAction)
+            {
+                action.Operate();
+            }
+        }
+
+        public int GetVariableValue(string variableName)
+        {
+            int value = 0;
+            if (GlobalVariables.TryGetValue(variableName, out value))
+            {
+                return value;
+            }
+            else
+            {
+                GlobalVariables.Add(variableName, value);
+                return value;
+            }
+        }
+
+        public void SetVariableValue(string variableName, int targetValue)
+        {
+            if (GlobalVariables.ContainsKey(variableName))
+            {
+                GlobalVariables[variableName] = targetValue;
+            }
+            else
+            {
+                GlobalVariables.Add(variableName, targetValue);
+            }
+        }
+
+
+        /*
         public void debug()
         {
             Tree = new DialogueTree();
@@ -89,41 +205,6 @@ namespace DYTA.Dialogue
 
             stream.Close();
         }
-
-        public void LoadScriptsFromFile(string path)
-        {
-            var serializer = new DataContractJsonSerializer(typeof(DialogueTree));
-            var stream = File.Open(path, FileMode.Open);
-
-            Tree = (DialogueTree)serializer.ReadObject(stream);
-
-            stream.Close();
-        }
-
-        public int GetVariableValue(string variableName)
-        {
-            int value = 0;
-            if (GlobalVariables.TryGetValue(variableName, out value))
-            {
-                return value;
-            }
-            else
-            {
-                GlobalVariables.Add(variableName, value);
-                return value;
-            }
-        }
-
-        public void SetVariableValue(string variableName, int targetValue)
-        {
-            if (GlobalVariables.ContainsKey(variableName))
-            {
-                GlobalVariables[variableName] = targetValue;
-            }
-            else
-            {
-                GlobalVariables.Add(variableName, targetValue);
-            }
-        }
+        */
     }
 }

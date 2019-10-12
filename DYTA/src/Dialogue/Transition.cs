@@ -17,7 +17,7 @@ namespace DYTA.Dialogue
         [DataMember]
         public List<VariableCondition> Conditions { get; set; } = new List<VariableCondition>();
 
-        public bool IfSuccess()
+        public bool IfReachConditions()
         {
             foreach (var condition in Conditions)
             {

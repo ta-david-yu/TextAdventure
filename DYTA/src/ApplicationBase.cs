@@ -12,7 +12,8 @@ namespace DYTA
 
         public bool WillChangeScene { get; protected set; } = false;
 
-        private Action m_NextSceneSetupCall = delegate { };
+        private Action m_NextSceneInitCall = delegate { };
+        private Action m_ExitSceneCall = delegate { };
 
         public ApplicationBase(Math.RectInt bounds, PixelColor color)
         {
@@ -82,7 +83,8 @@ namespace DYTA
                     Audio.AudioManager.Instance.End();
                     UINode.Engine.Instance.Destruction();
 
-                    m_NextSceneSetupCall.Invoke();
+                    m_ExitSceneCall.Invoke();
+                    m_NextSceneInitCall.Invoke();
 
                     Audio.AudioManager.Instance.Begin();
                 }
@@ -110,10 +112,11 @@ namespace DYTA
             stopwatch.Stop();
         }
 
-        protected void loadScene(Action sceneSetupCall)
+        protected void loadScene(Action onInitScene, Action onExitScene)
         {
             WillChangeScene = true;
-            m_NextSceneSetupCall = sceneSetupCall;
+            m_NextSceneInitCall = onInitScene;
+            m_ExitSceneCall = onExitScene;
         }
 
         protected virtual void registerGlobalEvent()
