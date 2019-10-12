@@ -63,6 +63,7 @@ namespace Sandbox
         }
 
         #region Reference
+        private SingleColorCanvas m_InputFieldCanvas;
         private TextBox m_LocationTxt;
         private TextBox m_DesciptionTxt;
         private TextBox m_InputFieldTxt;
@@ -247,8 +248,7 @@ namespace Sandbox
                         }
                         else
                         {
-                            m_InGameState = InGameState.WaitingInput;
-                            m_PromptText.Node.IsActive = true;
+                            changeInGameState(InGameState.WaitingInput);
                         }
                         break;
                     case InGameState.WaitingInput:
@@ -418,14 +418,14 @@ namespace Sandbox
                 m_LocationTxt.verticalAlignment = TextBox.VerticalAlignment.Middle;
 
                 //// Description
-                var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 30), null, "Descr-Canvas");
+                var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 22), null, "Descr-Canvas");
                 var descriptionCanvas = descriptionNode.AddUIComponent<SingleColorCanvas>();
                 descriptionCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.White);
 
                 // 
-                var descriptionLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 30), descriptionNode, "Layout-Canvas");
+                var descriptionLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 22), descriptionNode, "Descr-Layout-Canvas");
                 var descriptionLayout = descriptionLayoutNode.AddUIComponent<Bitmap>();
-                descriptionLayout.LoadFromFile("./Assets/LocationLayout.txt", Bitmap.DrawType.Sliced);
+                descriptionLayout.LoadFromFile("./Assets/DescrLayout.txt", Bitmap.DrawType.Sliced);
 
                 var descriptionTitleNode = descriptionLayoutNode.AddUIComponent<TextBox>();
                 descriptionTitleNode.horizontalAlignment = TextBox.HorizontalAlignment.Left;
@@ -441,11 +441,11 @@ namespace Sandbox
 
                 //// InputField
                 var inputFieldNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 24, 67, 8), null, "Input-Canvas");
-                var inputFieldCanvas = inputFieldNode.AddUIComponent<SingleColorCanvas>();
-                inputFieldCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+                m_InputFieldCanvas = inputFieldNode.AddUIComponent<SingleColorCanvas>();
+                m_InputFieldCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.DarkYellow);
 
                 // 
-                var inputLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 8), inputFieldNode, "Layout-Canvas");
+                var inputLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 67, 8), inputFieldNode, "Input-Layout-Canvas");
                 var inputLayout = inputLayoutNode.AddUIComponent<Bitmap>();
                 inputLayout.LoadFromFile("./Assets/LocationLayout.txt", Bitmap.DrawType.Sliced);
 
@@ -476,7 +476,6 @@ namespace Sandbox
 
                 var respondTxtNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 62, 2), respondCanvasNode, "Output");
                 m_RespondText = respondTxtNode.AddUIComponent<TextBox>();
-                m_RespondText.text = "What do you want to do?";
                 m_RespondText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
             }
 
@@ -662,9 +661,7 @@ namespace Sandbox
             // TODO: load image to replace
             m_LocationTxt.text = nextSit.LocationName;
 
-            m_InGameState = InGameState.ShowDescription;
-            //m_CursorText.Node.IsActive = false;
-            //m_PromptText.Node.IsActive = false;
+            changeInGameState(InGameState.ShowDescription);
 
             m_DesciptionTxt.text = string.Empty;
             if (DialogueSystem.Instance.VisitedSituation.Contains(nextSitName))
@@ -688,6 +685,25 @@ namespace Sandbox
         private void handleOnExecuteInvalidCommand(string cmd)
         {
             m_RespondText.text = "There is no way you can [" + cmd + "] now.";
+        }
+
+        private void changeInGameState(InGameState state)
+        {
+            m_InGameState = state;
+            if (m_InGameState == InGameState.WaitingInput)
+            {
+                m_InputFieldCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+                m_PromptText.Node.IsActive = true;
+                m_CursorText.Node.IsActive = true;
+                m_RespondText.text = "What do you want to do?";
+            }
+            else if (m_InGameState == InGameState.ShowDescription)
+            {
+                m_InputFieldCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.DarkYellow);
+                m_CursorText.Node.IsActive = false;
+                m_PromptText.Node.IsActive = false;
+                m_RespondText.text = "";
+            }
         }
 
         #endregion

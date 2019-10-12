@@ -101,13 +101,13 @@ namespace DYTA.Render
                     {
                         node.PreRenderUIs();
 
-                        /*
+                        
                         var info = string.Empty;
                         info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
                         info += string.Format("p {0,2} {1,-15} PCD:{2}", node.ParentCanvas.Node.InstanceId, node.ParentCanvas.Node.Name, node.ParentCanvas.IsDirty);
                         info += " - PreRenderer";
                         FrameLogger.Log(info);
-                        */
+                        
                     }
                     index++;
                 }
@@ -127,13 +127,12 @@ namespace DYTA.Render
                         node.RenderUIs();
                         dirtyCanvases.Add(node.ParentCanvas);
 
-                        /*
                         var info = string.Empty;
                         info += string.Format("{0,2} : {1,-15} ", node.InstanceId, node.Name);
                         info += string.Format("p {0,2} {1,-15} PCD:{2}", node.ParentCanvas.Node.InstanceId, node.ParentCanvas.Node.Name, node.ParentCanvas.IsDirty);
                         info += " - Render";
                         FrameLogger.Log(info);
-                        */
+                        
                     }
                     index++;
                 }
@@ -311,6 +310,24 @@ namespace DYTA.Render
         {
             // ParentCanvas has to be set Dirty
             ParentCanvas.IsDirty = true;
+
+            /*
+            bool isDirtyForAll = false;
+            foreach (var node in ParentCanvas.Node.Parent.Children)
+            {
+                if (node.Canvas != null)
+                {
+                    if (node.Canvas == ParentCanvas)
+                    {
+                        isDirtyForAll = true;
+                    }
+                    else if (isDirtyForAll)
+                    {
+                        node.Canvas.IsDirty = true;
+                    }
+                }
+            }
+            */
         }
 
         private void setParent(UINode node)
