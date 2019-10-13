@@ -4,8 +4,31 @@ using System.Text;
 
 namespace DYTA.Audio
 {
+    public enum Note
+    {
+        SoL,
+        LaL,
+        SiL,
+
+        Do,
+        Re,
+        Mi,
+        Fa,
+        So,
+        La,
+        Si,
+
+        DoH
+    }
+
+
     public class AudioManager
     {
+        private static readonly int[] c_FrequencyTable = new int[]
+        {
+            392, 440, 494, 523, 587, 659, 698, 784, 880, 988, 1046
+        };
+
         class BeepUnit
         {
             public bool IsMute = false;
@@ -132,6 +155,11 @@ namespace DYTA.Audio
             {
                 m_MusicQueue.Enqueue(unit);
             }
+        }
+
+        public void PlayNote(int dur)
+        {
+
         }
 
         public void StopAllAudio()

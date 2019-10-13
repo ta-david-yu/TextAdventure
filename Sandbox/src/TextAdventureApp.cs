@@ -141,6 +141,9 @@ namespace Sandbox
         private const float c_MoveRightToLeftDuration = 6.5f;
         private const float c_MoveTimePerPixel = 0.1f;
 
+        private const float c_SmallMoveDuration = 70.0f;
+        private const float c_SmallMoveTimePerPixel = 1.55f;
+
         #endregion
 
         #region Global
@@ -447,10 +450,23 @@ namespace Sandbox
                     {
                         m_EndingState = EndingState.LandingEarth;
                         m_Timer = 0;
+                        m_RightToLeftNode.IsActive = false;
+                        m_EarthCutNode.IsActive = true;
                     }
                 }
                 else if (m_EndingState == EndingState.LandingEarth)
                 {
+                    if (m_SubTimer > c_SmallMoveTimePerPixel)
+                    {
+                        m_SmallModuleNode.Translate(new Vector2Int(-1, 0));
+                        m_SubTimer = 0;
+                    }
+
+                    if (m_Timer > c_SmallMoveDuration)
+                    {
+                        m_EndingState = EndingState.ShowEndingText;
+                        m_Timer = 0;
+                    }
                 }
                 else if (m_EndingState == EndingState.ShowEndingText)
                 {
@@ -755,6 +771,7 @@ namespace Sandbox
 
                 
             }
+
             // Second Cut
             {
                 m_RightToLeftNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 35), null, "RightToLeft-Node");
@@ -779,6 +796,42 @@ namespace Sandbox
                 var spaceShipImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 46, 8), spaceShip2Node, "ModuleImage");
                 var spaceShipImage = spaceShipImageNode.AddUIComponent<Bitmap>();
                 spaceShipImage.LoadFromFile("./Assets/RightToleftModule.txt");
+            }
+
+            // Third Cut
+            {
+                m_EarthCutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 35), null, "EarthCut-Node");
+                m_EarthCutNode.IsActive = false;
+
+                //
+                var bgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 22), m_EarthCutNode, "bg");
+                var gbCanvas = bgNode.AddUIComponent<SingleColorCanvas>();
+                gbCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var bgImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 22), bgNode, "bgImage");
+                var bgImage = bgImageNode.AddUIComponent<Bitmap>();
+                bgImage.LoadFromFile("./Assets/StarBackground.txt");
+
+                //
+                var earthNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 5, 47, 23), m_EarthCutNode, "earth");
+                var earthCanvas = earthNode.AddUIComponent<SingleColorCanvas>();
+                earthCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var earthImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 47, 23), earthNode, "earthImg");
+                var earthImage = earthImageNode.AddUIComponent<Bitmap>();
+                earthImage.LoadFromFile("./Assets/Earth.txt");
+
+                //
+                
+                m_SmallModuleNode = UINode.Engine.Instance.CreateNode(new RectInt(90, 20, 8, 1), m_EarthCutNode, "Module");
+
+                var spaceShip2Node = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 8, 1), m_SmallModuleNode, "ModuleImageNode");
+                var spaceShip2Node2Canvas = spaceShip2Node.AddUIComponent<SingleColorCanvas>();
+                spaceShip2Node2Canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var spaceShipImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 8, 1), spaceShip2Node, "ModuleImage");
+                var spaceShipImage = spaceShipImageNode.AddUIComponent<Bitmap>();
+                spaceShipImage.LoadFromFile("./Assets/SmallModule.txt");
             }
         }
 
