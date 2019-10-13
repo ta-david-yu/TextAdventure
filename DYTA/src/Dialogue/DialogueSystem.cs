@@ -106,7 +106,24 @@ namespace DYTA.Dialogue
             {
                 if (CurrentSituation.OnInvalidCommandTransition != null)
                 {
-                    EnterSituation(CurrentSituation.OnInvalidCommandTransition.TargetSituationName);
+                    trans = CurrentSituation.OnInvalidCommandTransition;
+
+                    // success
+                    if (trans.IfReachConditions())
+                    {
+                        // trans to situation
+                        EnterSituation(trans.TargetSituationName);
+                    }
+                    // failed
+                    else
+                    {
+                        if (trans.HasOnFialSituation)
+                        {
+                            EnterSituation(trans.OnFailSituationName);
+                        }
+
+                        OnTransitionFailed.Invoke(trans);
+                    }
                 }
                 else
                 {
@@ -120,8 +137,16 @@ namespace DYTA.Dialogue
             // setup variable, setup one time var, always var
             var prevSitName = m_CurrSitName;
 
-            m_CurrSitName = sitName;
-            CurrentSituation = Tree.SituationTables[sitName];
+            try
+            {
+                m_CurrSitName = sitName;
+
+                CurrentSituation = Tree.SituationTables[sitName];
+            }
+            catch (Exception exp)
+            {
+                FrameLogger.LogError(string.Format(exp.Message + ", SitName {0} not found", sitName));
+            }
 
             ////
             OnEnterSituation.Invoke(prevSitName, sitName);
@@ -195,6 +220,8 @@ namespace DYTA.Dialogue
             sit0.LocationName = new string("SIT-00_Location");
             sit0.FirstDescription = new string("SIT-00_FDescr");
             sit0.Description = new string("SIT-00_Descr");
+            sit0.OnInvalidCommandTransition = new Transition();
+            sit0.OnInvalidCommandTransition.TargetSituationName = "XXX";
 
             sit0.OneTimeSetValueAction = new List<SetGlobalVariable>();
             sit0.OneTimeSetValueAction.Add(new SetGlobalVariable());

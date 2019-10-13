@@ -204,9 +204,9 @@ namespace Sandbox
                                 m_CommandString.Length = 0;
                                 AudioManager.Instance.BeepMusic(350, 20);
 
-                                if (m_IsDead)
+                                //if (!m_IsDead)
                                 {
-                                    m_RespondText.text = string.Empty;
+                                  //  m_RespondText.text = string.Empty;
                                 }
                             }
                             else
@@ -263,6 +263,8 @@ namespace Sandbox
             else if (m_CurrScene == Scene.InGame)
             {
                 #region Debug
+
+                FrameLogger.Log("SIT: " + DialogueSystem.Instance.CurrSitName);
 
                 foreach (var trans in DialogueSystem.Instance.CurrentSituation.SituationTransitions)
                 {
@@ -762,31 +764,38 @@ namespace Sandbox
 
         private void handleOnSituationChanged(string prevSitName, string nextSitName)
         {
-            var nextSit = DialogueSystem.Instance.Tree.SituationTables[nextSitName];
-            
-            if (nextSit.LocationName == "Death")
+            try
             {
-                m_IsDead = true;
+                var nextSit = DialogueSystem.Instance.Tree.SituationTables[nextSitName];
+
+                if (nextSit.LocationName == "Death")
+                {
+                    m_IsDead = true;
+                }
+
+                if (nextSit.IsEnding)
+                {
+                    m_IsFinished = true;
+                }
+
+                // TODO: load image to replace
+                m_LocationTxt.text = nextSit.LocationName;
+
+                changeInGameState(InGameState.ShowDescription);
+
+                m_DesciptionTxt.text = string.Empty;
+                if (DialogueSystem.Instance.VisitedSituation.Contains(nextSitName))
+                {
+                    m_DescriptionBuffer = nextSit.Description;
+                }
+                else
+                {
+                    m_DescriptionBuffer = nextSit.FirstDescription;
+                }
             }
-
-            if (nextSit.IsEnding)
+            catch (Exception exp)
             {
-                m_IsFinished = true;
-            }
-
-            // TODO: load image to replace
-            m_LocationTxt.text = nextSit.LocationName;
-
-            changeInGameState(InGameState.ShowDescription);
-
-            m_DesciptionTxt.text = string.Empty;
-            if (DialogueSystem.Instance.VisitedSituation.Contains(nextSitName))
-            {
-                m_DescriptionBuffer = nextSit.Description;
-            }
-            else
-            {
-                m_DescriptionBuffer = nextSit.FirstDescription;
+                FrameLogger.LogError(string.Format(exp.Message + ", SitName {0} not found", nextSitName));
             }
         }
 
