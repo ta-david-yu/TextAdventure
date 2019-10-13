@@ -73,6 +73,7 @@ namespace Sandbox
         private TextBox m_PromptText;
         private UnlitBox m_CursorText;
         private TextBox m_RespondText;
+        private Bitmap m_LocationImg;
         #endregion
 
         private InGameState m_InGameState = InGameState.ShowDescription;
@@ -111,6 +112,19 @@ namespace Sandbox
         #region Override
         protected override void loadInitialScene()
         {
+            if (System.IO.File.Exists(c_SaveFileName))
+            {
+                m_Progress = PlayerProgress.LoadFromFile(c_SaveFileName);
+            }
+            else
+            {
+                m_Progress = new PlayerProgress();
+                m_Progress.HasClearedGame = false;
+                m_Progress.Situation = "FirstModule";
+                m_Progress.GlobalVariables = new Dictionary<string, int>();
+                m_Progress.VisitedSituation = new HashSet<string>();
+            }
+
             enterMainMenu();
         }
 
@@ -155,7 +169,6 @@ namespace Sandbox
                 else if (keyInfo.Key == ConsoleKey.F1)
                 {
                     // save to file
-                    m_Progress = new PlayerProgress();
                     m_Progress.Situation = DialogueSystem.Instance.CurrSitName;
                     m_Progress.GlobalVariables = DialogueSystem.Instance.GlobalVariables;
                     m_Progress.VisitedSituation = DialogueSystem.Instance.VisitedSituation;
@@ -463,7 +476,7 @@ namespace Sandbox
                 //// Location
                 var locationNode = UINode.Engine.Instance.CreateNode(new RectInt(2, 2, 22, 30), null, "LocationCanvas");
                 var locationCanvas = locationNode.AddUIComponent<SingleColorCanvas>();
-                locationCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.White);
+                locationCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Cyan);
 
                 var locationLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 22, 30), locationNode, "Bitmap");
                 var locationLayout = locationLayoutNode.AddUIComponent<Bitmap>();
@@ -474,11 +487,20 @@ namespace Sandbox
                 locationTitle.verticalAlignment = TextBox.VerticalAlignment.Top;
                 locationTitle.text = "[ LOCATION ]";
 
-                var locationNameNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 22, 30), locationNode, "LocationName");
+                var locationInsideCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 20, 28), locationNode, "InsideCanvas");
+                var locationInsideCanvas = locationInsideCanvasNode.AddUIComponent<SingleColorCanvas>();
+                locationInsideCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.DarkGreen);
+
+
+                var locationNameNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 20, 28), locationInsideCanvasNode, "LocationName");
                 m_LocationTxt = locationNameNode.AddUIComponent<TextBox>();
                 m_LocationTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
                 m_LocationTxt.verticalAlignment = TextBox.VerticalAlignment.Middle;
 
+                var locationImgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 20, 28), locationInsideCanvasNode, "LocationImg");
+                m_LocationImg = locationImgNode.AddUIComponent<Bitmap>();
+                m_LocationImg.LoadFromFile("./Assets/Rocket.txt");
+                
                 //// Description
                 var descriptionNode = UINode.Engine.Instance.CreateNode(new RectInt(26, 2, 67, 22), null, "Descr-Canvas");
                 var descriptionCanvas = descriptionNode.AddUIComponent<SingleColorCanvas>();
@@ -558,21 +580,10 @@ namespace Sandbox
             // load save file if there's one, or flag is set
             if (m_LoadSaveFile)
             {
-                if (System.IO.File.Exists(c_SaveFileName))
-                {
-                    m_Progress = PlayerProgress.LoadFromFile(c_SaveFileName);
-                }
-                else
-                {
-                    m_Progress = new PlayerProgress();
-                    m_Progress.Situation = "FirstModule";
-                    m_Progress.GlobalVariables = new Dictionary<string, int>();
-                    m_Progress.VisitedSituation = new HashSet<string>();
-                }
+                m_Progress = PlayerProgress.LoadFromFile(c_SaveFileName);
             }
             else
             {
-                m_Progress = new PlayerProgress();
                 m_Progress.Situation = "FirstModule";
                 m_Progress.GlobalVariables = new Dictionary<string, int>();
                 m_Progress.VisitedSituation = new HashSet<string>();
@@ -779,7 +790,19 @@ namespace Sandbox
                 }
 
                 // TODO: load image to replace
-                m_LocationTxt.text = nextSit.LocationName;
+                var path = "./Assets/" + nextSit.LocationName + ".txt";
+                if (System.IO.File.Exists(path))
+                {
+                    m_LocationImg.Node.IsActive = true;
+                    m_LocationTxt.Node.IsActive = false;
+                    m_LocationImg.LoadFromFile(path);
+                }
+                else
+                {
+                    m_LocationImg.Node.IsActive = false;
+                    m_LocationTxt.Node.IsActive = true;
+                    m_LocationTxt.text = nextSit.LocationName + "\n\nNO IMAGE";
+                }
 
                 changeInGameState(InGameState.ShowDescription);
 

@@ -11,6 +11,9 @@ namespace Sandbox
     public class PlayerProgress
     {
         [DataMember]
+        public bool HasClearedGame { get; set; } = false;
+
+        [DataMember]
         public string Situation { get; set; }
 
         [DataMember]
