@@ -15,7 +15,8 @@ namespace Sandbox
         public enum Scene
         {
             MainMenu,
-            InGame
+            InGame,
+            Ending
         }
 
         private Scene m_CurrScene = Scene.MainMenu;
@@ -24,11 +25,6 @@ namespace Sandbox
         private TextBox m_HintBannerText;
 
         #region MainMenu Var
-        enum MenuState
-        {
-            Main,
-            Save
-        }
 
         private UINode m_MainMenuNode;
 
@@ -94,6 +90,56 @@ namespace Sandbox
         private static readonly Vector2Int c_CursorAnchor = new Vector2Int(5, 2);
 
         private const string c_SaveFileName = "./save.json";
+
+        #endregion
+
+        #region Ending Var
+
+        enum EndingState
+        {
+            WaitingShaking,
+            WaitingLiftoff,
+
+            MoveRightToLeft,
+
+            LandingEarth,
+
+            ShowEndingText
+        }
+
+        #region Reference
+
+        private UINode m_WaitingNode;
+        private SingleColorCanvas m_ISSCanvas;
+        private UINode m_ModuleNode;
+
+        private UINode m_RightToLeftNode;
+        private UINode m_RightToLeftModuleNode;
+
+        private UINode m_EarthCutNode;
+        private UINode m_SmallModuleNode;
+
+        private SingleColorCanvas m_EndingText;
+
+        #endregion
+
+        private EndingState m_EndingState = EndingState.WaitingShaking;
+
+        private float m_Timer = 0;
+        private float m_SubTimer = 0;
+
+        private bool m_ModuleIsLeft = false;
+        private float m_ShakeTimer = 0;
+        private float m_LiftOffMoveTimer = 0;
+
+        private const float c_ShakingDuration = 3.5f;
+        private const float c_ShakingCycle = 0.08f;
+
+        private const float c_LiftoffDuration = 2.7f;
+        private const float c_LiftOffTimePerPixel = 0.27f;
+
+        private const float c_MoveRightToLeftDuration = 6.5f;
+        private const float c_MoveTimePerPixel = 0.1f;
 
         #endregion
 
@@ -216,11 +262,6 @@ namespace Sandbox
                                 executeCommand(m_CommandString.ToString());
                                 m_CommandString.Length = 0;
                                 AudioManager.Instance.BeepMusic(350, 20);
-
-                                //if (!m_IsDead)
-                                {
-                                  //  m_RespondText.text = string.Empty;
-                                }
                             }
                             else
                             {
@@ -245,6 +286,13 @@ namespace Sandbox
                         case InGameState.Animation:
                             break;
                     }
+                }
+            }
+            else if (m_CurrScene == Scene.Ending)
+            {
+                if (keyInfo.Key == ConsoleKey.Escape)
+                {
+                    loadScene(enterMainMenu, exitMainMenu);
                 }
             }
         }
@@ -340,6 +388,76 @@ namespace Sandbox
                         break;
                     case InGameState.Animation:
                         break;
+                }
+            }
+            else if (m_CurrScene == Scene.Ending)
+            {
+                m_Timer += second;
+                m_SubTimer += second;
+                m_ShakeTimer += second;
+
+                if (m_EndingState == EndingState.WaitingShaking)
+                {
+                    if (m_ShakeTimer > c_ShakingCycle)
+                    {
+                        m_ModuleNode.Translate(new Vector2Int((m_ModuleIsLeft) ? 2 : -2, 0));
+                        m_ModuleIsLeft = !m_ModuleIsLeft;
+                        m_ShakeTimer = 0;
+                    }
+
+                    if (m_Timer > c_ShakingDuration)
+                    {
+                        m_EndingState = EndingState.WaitingLiftoff;
+                        m_Timer = 0;
+                    }
+                }
+                else if (m_EndingState == EndingState.WaitingLiftoff)
+                {
+                    m_LiftOffMoveTimer += second;
+                    if (m_ShakeTimer > c_ShakingCycle)
+                    {
+                        m_ModuleNode.Translate(new Vector2Int((m_ModuleIsLeft) ? 2 : -2, 0));
+                        m_ModuleIsLeft = !m_ModuleIsLeft;
+                        m_ShakeTimer = 0;
+                    }
+
+                    if (m_LiftOffMoveTimer > c_LiftOffTimePerPixel)
+                    {
+                        m_ModuleNode.Translate(new Vector2Int(0, -1));
+                        m_LiftOffMoveTimer = 0;
+                    }
+
+                    if (m_Timer > c_LiftoffDuration)
+                    {
+                        m_EndingState = EndingState.MoveRightToLeft;
+                        m_Timer = 0;
+                        m_WaitingNode.IsActive = false;
+                        m_RightToLeftNode.IsActive = true;
+                    }
+                }
+                else if (m_EndingState == EndingState.MoveRightToLeft)
+                {
+                    if (m_SubTimer > c_MoveTimePerPixel)
+                    {
+                        m_RightToLeftModuleNode.Translate(new Vector2Int(-1, 0));
+                        m_SubTimer = 0;
+                    }
+
+                    if (m_Timer > c_MoveRightToLeftDuration)
+                    {
+                        m_EndingState = EndingState.LandingEarth;
+                        m_Timer = 0;
+                    }
+                }
+                else if (m_EndingState == EndingState.LandingEarth)
+                {
+                }
+                else if (m_EndingState == EndingState.ShowEndingText)
+                {
+                }
+                else
+                {
+
                 }
             }
         }
@@ -592,6 +710,78 @@ namespace Sandbox
             DialogueSystem.Instance.Load(m_Progress.Situation, m_Progress.GlobalVariables, m_Progress.VisitedSituation);
         }
 
+        private void enterEnding()
+        {
+            m_CurrScene = Scene.Ending;
+            m_EndingState = EndingState.WaitingShaking;
+            m_Timer = 0;
+            m_SubTimer = 0;
+            m_ShakeTimer = 0;
+
+            playSpaceOddity();
+
+            // First cut
+            {
+                m_WaitingNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 35), null, "Waiting-Node");
+
+                //
+                var bgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 22), m_WaitingNode, "bg");
+                var gbCanvas = bgNode.AddUIComponent<SingleColorCanvas>();
+                gbCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var bgImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 22), bgNode, "bgImage");
+                var bgImage = bgImageNode.AddUIComponent<Bitmap>();
+                bgImage.LoadFromFile("./Assets/StarBackground.txt");
+
+                //
+                m_ModuleNode = UINode.Engine.Instance.CreateNode(new RectInt(56, 9, 15, 21), m_WaitingNode, "Module");
+
+                var module2Node = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 15, 21), m_ModuleNode, "ModuleImage");
+                var module2Canvas = module2Node.AddUIComponent<SingleColorCanvas>();
+                module2Canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var moduleImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 15, 21), module2Node, "ModuleImage");
+                var moduleImage = moduleImageNode.AddUIComponent<Bitmap>();
+                moduleImage.LoadFromFile("./Assets/ISS-Module.txt");
+
+                //
+                var iSSNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 23, 95, 14), m_WaitingNode, "ISS");
+                m_ISSCanvas = iSSNode.AddUIComponent<SingleColorCanvas>();
+                m_ISSCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var iSSImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 14), iSSNode, "ISSImage");
+                var iSSImage = iSSImageNode.AddUIComponent<Bitmap>();
+                iSSImage.LoadFromFile("./Assets/ISS-Station.txt");
+
+                
+            }
+            // Second Cut
+            {
+                m_RightToLeftNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 35), null, "RightToLeft-Node");
+                m_RightToLeftNode.IsActive = false;
+
+                //
+                var bgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 22), m_RightToLeftNode, "bg");
+                var gbCanvas = bgNode.AddUIComponent<SingleColorCanvas>();
+                gbCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var bgImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 22), bgNode, "bgImage");
+                var bgImage = bgImageNode.AddUIComponent<Bitmap>();
+                bgImage.LoadFromFile("./Assets/StarBackground.txt");
+
+                //
+                m_RightToLeftModuleNode = UINode.Engine.Instance.CreateNode(new RectInt(60, 15, 46, 8), m_RightToLeftNode, "Module");
+
+                var spaceShip2Node = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 46, 8), m_RightToLeftModuleNode, "ModuleImage");
+                var spaceShip2Node2Canvas = spaceShip2Node.AddUIComponent<SingleColorCanvas>();
+                spaceShip2Node2Canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
+
+                var spaceShipImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 46, 8), spaceShip2Node, "ModuleImage");
+                var spaceShipImage = spaceShipImageNode.AddUIComponent<Bitmap>();
+                spaceShipImage.LoadFromFile("./Assets/RightToleftModule.txt");
+            }
+        }
+
         private void exitMainMenu()
         {
             // nothing
@@ -603,6 +793,11 @@ namespace Sandbox
             DialogueSystem.Instance.OnEnterSituation -= handleOnSituationChanged;
             DialogueSystem.Instance.OnTransitionFailed -= handleOnTransitionFailed;
             DialogueSystem.Instance.OnExecuteInvalidCommand -= handleOnExecuteInvalidCommand;
+        }
+
+        private void exitEnding()
+        {
+
         }
 
         #endregion
@@ -765,7 +960,8 @@ namespace Sandbox
             }
             else if (m_IsFinished)
             {
-                loadScene(enterMainMenu, exitMainMenu);
+                m_Progress.HasClearedGame = true;
+                loadScene(enterEnding, exitEnding);
             }
             else
             {
