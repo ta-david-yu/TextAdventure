@@ -157,9 +157,9 @@ namespace DYTA.Audio
             }
         }
 
-        public void PlayNote(int dur)
+        public void PlayNote(Note note, int dur)
         {
-
+            BeepMusic(c_FrequencyTable[(int)note], dur);
         }
 
         public void StopAllAudio()

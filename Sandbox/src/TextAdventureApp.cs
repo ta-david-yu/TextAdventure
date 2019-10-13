@@ -858,44 +858,44 @@ namespace Sandbox
         private void playSpaceOddity()
         {
             #region Audio
-
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(523, 200); // DO
-            AudioManager.Instance.BeepMusic(523, 600); // DO
-            AudioManager.Instance.BeepMusic(523, 200); // DO
-            AudioManager.Instance.BeepMusic(587, 600); // RE
-            AudioManager.Instance.BeepMusic(523, 200); // DO
-            AudioManager.Instance.BeepMusic(494, 600); // SI
+            /*
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 600);
 
             AudioManager.Instance.DelayMusic(1200);
 
-            AudioManager.Instance.BeepMusic(440, 800); // LA
-            AudioManager.Instance.BeepMusic(392, 800); // SO
-            AudioManager.Instance.BeepMusic(523, 800); // DO
+            AudioManager.Instance.PlayNote(Note.LaL, 800);
+            AudioManager.Instance.PlayNote(Note.SoL, 800);
+            AudioManager.Instance.PlayNote(Note.Do, 800);
 
             AudioManager.Instance.DelayMusic(100);
 
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(523, 200); // DO
-            AudioManager.Instance.BeepMusic(523, 600); // DO 
-            AudioManager.Instance.BeepMusic(523, 200); // DO
-            AudioManager.Instance.BeepMusic(587, 600); // RE
-            AudioManager.Instance.BeepMusic(523, 200); // DO
-            AudioManager.Instance.BeepMusic(494, 600); // SI
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 600);
 
             AudioManager.Instance.DelayMusic(4000);
 
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(587, 200); // RE
-            AudioManager.Instance.BeepMusic(587, 1200); // RE
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 1200);
 
             AudioManager.Instance.DelayMusic(800);
 
@@ -922,29 +922,62 @@ namespace Sandbox
 
             AudioManager.Instance.DelayMusic(800);
 
-            AudioManager.Instance.BeepMusic(392, 200); // SO
-            AudioManager.Instance.BeepMusic(392, 600); // SO
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(698, 400); // FA
-            AudioManager.Instance.BeepMusic(659, 400); // MI
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(494, 600); // SI
+            AudioManager.Instance.PlayNote(Note.SoL, 200);
+            AudioManager.Instance.PlayNote(Note.SoL, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Fa, 400);
+            AudioManager.Instance.PlayNote(Note.Mi, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 600);
 
             AudioManager.Instance.DelayMusic(800);
 
-            AudioManager.Instance.BeepMusic(494, 400); // SI
-            AudioManager.Instance.BeepMusic(659, 400); // MI
-            AudioManager.Instance.BeepMusic(587, 400); // RE
-            AudioManager.Instance.BeepMusic(523, 400); // DO
-            AudioManager.Instance.BeepMusic(494, 400); // SI
-            AudioManager.Instance.BeepMusic(523, 600); // DO
-            AudioManager.Instance.BeepMusic(587, 200); // RE
-            AudioManager.Instance.BeepMusic(440, 600); // LA
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+            AudioManager.Instance.PlayNote(Note.Mi, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.LaL, 600);
 
+            AudioManager.Instance.DelayMusic(1200);
+            
             // .. and the papers want to know whose shirts you wear
+            AudioManager.Instance.PlayNote(Note.LaL, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
 
+            AudioManager.Instance.DelayMusic(1600);
+            
+            */
+            // Now it's time to leave the capsule if you dare
+            AudioManager.Instance.PlayNote(Note.LaL, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+
+            AudioManager.Instance.PlayNote(Note.Fa, 600);
+            AudioManager.Instance.PlayNote(Note.Mi, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
 
             #endregion
         }
