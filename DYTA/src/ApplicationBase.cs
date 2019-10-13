@@ -42,12 +42,10 @@ namespace DYTA
 
             long timeStep = minimumStepPerFrame;
 
-            long frameCounter = 0;
-
             while (true)
             {
                 // debug
-                string frameInfo = string.Format("FRAME: {0, -5}- TIMESTEP: {1, -5}- NODE CT: {2, -5}", ++frameCounter, timeStep, UINode.Engine.Instance.NodeIdCounter);
+                //string frameInfo = string.Format("FRAME: {0, -5}- TIMESTEP: {1, -5}- NODE CT: {2, -5}", ++frameCounter, timeStep, UINode.Engine.Instance.NodeIdCounter);
                 //FrameLogger.Log(frameInfo);
 
                 // input

@@ -20,6 +20,9 @@ namespace Sandbox
 
         private Scene m_CurrScene = Scene.MainMenu;
 
+        private SingleColorCanvas m_HintBanner;
+        private TextBox m_HintBannerText;
+
         #region MainMenu Var
         enum MenuState
         {
@@ -82,6 +85,9 @@ namespace Sandbox
         private float m_CursorFlickringTimer = 0;
         private bool m_LoadSaveFile = false;
 
+        private bool m_IsDead = false;
+        private bool m_IsFinished = false;
+
         private const float c_DescrTextDuration = 0.02f;
         private const float c_CursorFlickringDuration = 0.4f;
         private const int c_InputFieldMaxLength = 58;
@@ -102,7 +108,15 @@ namespace Sandbox
 
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
         {
-            if (m_CurrScene == Scene.MainMenu)
+            if (keyInfo.Key == ConsoleKey.F9)
+            {
+                FrameLogger.Toggle();
+            }
+            else if (keyInfo.Key == ConsoleKey.F8)
+            {
+                AudioManager.Instance.IsMute = !AudioManager.Instance.IsMute;
+            }
+            else if (m_CurrScene == Scene.MainMenu)
             {
                 if (keyInfo.Key == ConsoleKey.Escape)
                 {
@@ -153,19 +167,26 @@ namespace Sandbox
                             }
                             else if (keyInfo.Key == ConsoleKey.Enter)
                             {
-                                m_RespondText.text = string.Empty;
                                 executeCommand(m_CommandString.ToString());
                                 m_CommandString.Length = 0;
                                 AudioManager.Instance.BeepMusic(350, 20);
+
+                                if (m_IsDead)
+                                {
+                                    m_RespondText.text = string.Empty;
+                                }
                             }
                             else
                             {
+                                
                                 if (m_CommandString.Length == 0)
                                 {
-                                    // cleanup respond text
-                                    m_RespondText.text = string.Empty;
+                                    if (!m_IsDead)
+                                    {
+                                        m_RespondText.text = string.Empty;
+                                    }
                                 }
-
+                                
                                 if (m_CommandString.Length < c_InputFieldMaxLength)
                                 {
                                     m_CommandString.Append(keyInfo.KeyChar);
@@ -210,22 +231,23 @@ namespace Sandbox
             else if (m_CurrScene == Scene.InGame)
             {
                 #region Debug
+
                 foreach (var trans in DialogueSystem.Instance.CurrentSituation.SituationTransitions)
                 {
                     StringBuilder info = new StringBuilder();
-                    info.Append(string.Format("{0, -15} -> {1, 15}", trans.Key, trans.Value.TargetSituationName));
+                    info.Append(string.Format("CMD: {0, -15} -> SIT: {1, -15}", trans.Key, trans.Value.TargetSituationName));
+                    FrameLogger.Log(info.ToString());
+                }
+
+                foreach (var variable in DialogueSystem.Instance.GlobalVariables)
+                {
+                    StringBuilder info = new StringBuilder();
+                    info.Append(string.Format("({0, -9} = {1, 3:D3})", variable.Key, variable.Value));
                     FrameLogger.Log(info.ToString());
                 }
 
                 FrameLogger.Log("");
                 #endregion
-
-                foreach (var variable in DialogueSystem.Instance.GlobalVariables)
-                {
-                    StringBuilder info = new StringBuilder();
-                    info.Append(string.Format("({0, -9}={1, 3:D3})", variable.Key, variable.Value));
-                    FrameLogger.Log(info.ToString());
-                }
 
                 switch (m_InGameState)
                 {
@@ -272,11 +294,6 @@ namespace Sandbox
                         break;
                 }
             }
-        }
-
-        protected override void postRenderUpdate(long timeStep)
-        {
-            //Console.SetCursorPosition
         }
 
         #endregion
@@ -383,6 +400,13 @@ namespace Sandbox
                 hintTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
                 hintTxt.verticalAlignment = TextBox.VerticalAlignment.Top;
             }
+            var bannerNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 32, 95, 1), null, "BannerCanvas");
+            m_HintBanner = bannerNode.AddUIComponent<SingleColorCanvas>();
+            m_HintBanner.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
+            var bannerTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 1), bannerNode, "BannerText");
+            m_HintBannerText = bannerTextNode.AddUIComponent<TextBox>();
+            m_HintBannerText.text = "[F8] to mute/unmute audio, [F9] to turn on/off debug mode";
+            m_HintBannerText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
 
             // Final setup
             selectMainMenuOption(m_CurrMenuSelection);
@@ -393,6 +417,9 @@ namespace Sandbox
             //DialogueSystem.Instance.debug();
 
             m_CurrScene = Scene.InGame;
+
+            m_IsDead = false;
+            m_IsFinished = false;
 
             m_CommandString = new StringBuilder("");
 
@@ -478,6 +505,13 @@ namespace Sandbox
                 m_RespondText = respondTxtNode.AddUIComponent<TextBox>();
                 m_RespondText.horizontalAlignment = TextBox.HorizontalAlignment.Left;
             }
+            var bannerNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 32, 95, 1), null, "BannerCanvas");
+            m_HintBanner = bannerNode.AddUIComponent<SingleColorCanvas>();
+            m_HintBanner.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
+            var bannerTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 1), bannerNode, "BannerText");
+            m_HintBannerText = bannerTextNode.AddUIComponent<TextBox>();
+            m_HintBannerText.text = "[ESC] to main menu, [F1] to save, [F2] to load, [ENTER] to skip description";
+            m_HintBannerText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
 
             // Setup Dialogue Machine
             DialogueSystem.Instance.CreateDialogueTreeFromFile("./SpaceBoy.json");
@@ -651,12 +685,37 @@ namespace Sandbox
 
         private void executeCommand(string input)
         {
-            DialogueSystem.Instance.ExecuteCommand(input);
+            if (m_IsDead)
+            {
+                if (string.Compare(input, "new", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    m_LoadSaveFile = false;
+                    loadScene(enterInGame, exitInGame);
+                }
+                else if (string.Compare(input, "load", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    m_LoadSaveFile = true;
+                    loadScene(enterInGame, exitInGame);
+                }
+                else if (string.Compare(input, "exit", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    loadScene(enterMainMenu, exitMainMenu);
+                }
+            }
+            else
+            {
+                DialogueSystem.Instance.ExecuteCommand(input);
+            }
         }
 
         private void handleOnSituationChanged(string prevSitName, string nextSitName)
         {
             var nextSit = DialogueSystem.Instance.Tree.SituationTables[nextSitName];
+            
+            if (nextSit.LocationName == "Death")
+            {
+                m_IsDead = true;
+            }
 
             // TODO: load image to replace
             m_LocationTxt.text = nextSit.LocationName;
@@ -684,7 +743,10 @@ namespace Sandbox
 
         private void handleOnExecuteInvalidCommand(string cmd)
         {
-            m_RespondText.text = "There is no way you can [" + cmd + "] now.";
+            if (!m_IsDead)
+            {
+                m_RespondText.text = "There is no way you can [" + cmd + "] now.";
+            }
         }
 
         private void changeInGameState(InGameState state)
@@ -695,7 +757,15 @@ namespace Sandbox
                 m_InputFieldCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkBlue, ConsoleColor.Yellow);
                 m_PromptText.Node.IsActive = true;
                 m_CursorText.Node.IsActive = true;
-                m_RespondText.text = "What do you want to do?";
+
+                if (DialogueSystem.Instance.CurrentSituation.LocationName == "Death")
+                {
+                    m_RespondText.text = "[NEW] to start a new game, [LOAD] to load from previous save, \n[EXIT] to main menu";
+                }
+                else
+                {
+                    m_RespondText.text = "What do you want to do?";
+                }
             }
             else if (m_InGameState == InGameState.ShowDescription)
             {
