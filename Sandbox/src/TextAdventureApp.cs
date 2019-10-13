@@ -162,17 +162,23 @@ namespace Sandbox
 
                     PlayerProgress.SaveToFile(m_Progress, c_SaveFileName);
 
+                    AudioManager.Instance.BeepMusic(790, 50);
+
                     FrameLogger.LogError("SAVE COMPLETE! >>> press enter to continue <<<\n\n");
                 }
                 else if (keyInfo.Key == ConsoleKey.F2)
                 {
                     // load from file
+
                     m_LoadSaveFile = true;
                     loadScene(enterInGame, exitInGame);
+
+                    AudioManager.Instance.BeepMusic(790, 50);
+
+                    FrameLogger.LogError("LOAD COMPLETE! >>> press enter to continue <<<\n\n");
                 }
                 else
                 {
-
                     switch (m_InGameState)
                     {
                         case InGameState.ShowDescription:
@@ -205,7 +211,6 @@ namespace Sandbox
                             }
                             else
                             {
-                                
                                 if (m_CommandString.Length == 0)
                                 {
                                     if (!m_IsDead)
@@ -558,7 +563,7 @@ namespace Sandbox
                 else
                 {
                     m_Progress = new PlayerProgress();
-                    m_Progress.Situation = "FirstVessel";
+                    m_Progress.Situation = "FirstModule";
                     m_Progress.GlobalVariables = new Dictionary<string, int>();
                     m_Progress.VisitedSituation = new HashSet<string>();
                 }
@@ -566,7 +571,7 @@ namespace Sandbox
             else
             {
                 m_Progress = new PlayerProgress();
-                m_Progress.Situation = "FirstVessel";
+                m_Progress.Situation = "FirstModule";
                 m_Progress.GlobalVariables = new Dictionary<string, int>();
                 m_Progress.VisitedSituation = new HashSet<string>();
             }
@@ -745,6 +750,10 @@ namespace Sandbox
                     loadScene(enterMainMenu, exitMainMenu);
                 }
             }
+            else if (m_IsFinished)
+            {
+                loadScene(enterMainMenu, exitMainMenu);
+            }
             else
             {
                 DialogueSystem.Instance.ExecuteCommand(input);
@@ -758,6 +767,11 @@ namespace Sandbox
             if (nextSit.LocationName == "Death")
             {
                 m_IsDead = true;
+            }
+
+            if (nextSit.IsEnding)
+            {
+                m_IsFinished = true;
             }
 
             // TODO: load image to replace
@@ -786,7 +800,7 @@ namespace Sandbox
 
         private void handleOnExecuteInvalidCommand(string cmd)
         {
-            if (!m_IsDead)
+            if (!m_IsDead || !m_IsFinished)
             {
                 m_RespondText.text = "There is no way you can [" + cmd + "] now.";
             }
@@ -801,9 +815,13 @@ namespace Sandbox
                 m_PromptText.Node.IsActive = true;
                 m_CursorText.Node.IsActive = true;
 
-                if (DialogueSystem.Instance.CurrentSituation.LocationName == "Death")
+                if (m_IsDead)
                 {
                     m_RespondText.text = "[NEW] to start a new game, [LOAD] to load from previous save, \n[EXIT] to main menu";
+                }
+                else if (m_IsFinished)
+                {
+                    m_RespondText.text = "[ENTER] to continue";
                 }
                 else
                 {

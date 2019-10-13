@@ -18,6 +18,12 @@ namespace DYTA.Dialogue
         public string Description { get; set; } = "Description";
 
         [DataMember]
+        public Transition OnInvalidCommandTransition { get; set; } = null;
+
+        [DataMember]
+        public bool IsEnding { get; set; } = false;
+
+        [DataMember]
         // cmd -> trans
         public Dictionary<string, Transition> SituationTransitions { get; set; } = new Dictionary<string, Transition>(StringComparer.OrdinalIgnoreCase);
 

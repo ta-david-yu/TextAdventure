@@ -104,7 +104,14 @@ namespace DYTA.Dialogue
             }
             else
             {
-                OnExecuteInvalidCommand.Invoke(actionName);
+                if (CurrentSituation.OnInvalidCommandTransition != null)
+                {
+                    EnterSituation(CurrentSituation.OnInvalidCommandTransition.TargetSituationName);
+                }
+                else
+                {
+                    OnExecuteInvalidCommand.Invoke(actionName);
+                }
             }
         }
 
