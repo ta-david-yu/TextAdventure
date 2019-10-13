@@ -32,6 +32,11 @@ namespace DYTA.Dialogue
         public DialogueTree Tree { get; private set; }
 
         private string m_CurrSitName = string.Empty;
+        public string CurrSitName
+        {
+            get { return m_CurrSitName; }
+        }
+
         private Situation m_CurrentSituation = null;
         public Situation CurrentSituation 
         { 

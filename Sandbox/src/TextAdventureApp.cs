@@ -83,7 +83,6 @@ namespace Sandbox
         private StringBuilder m_CommandString = new StringBuilder("");
 
         private float m_CursorFlickringTimer = 0;
-        private bool m_LoadSaveFile = false;
 
         private bool m_IsDead = false;
         private bool m_IsFinished = false;
@@ -93,8 +92,17 @@ namespace Sandbox
         private const int c_InputFieldMaxLength = 58;
         private static readonly Vector2Int c_CursorAnchor = new Vector2Int(5, 2);
 
+        private const string c_SaveFileName = "./save.json";
+
         #endregion
 
+        #region Global
+
+        private PlayerProgress m_Progress;
+
+        private bool m_LoadSaveFile = false;
+
+        #endregion
 
         public TextAdventureApp(RectInt bounds, PixelColor color) : base(bounds, color)
         {
@@ -141,7 +149,26 @@ namespace Sandbox
             {
                 if (keyInfo.Key == ConsoleKey.Escape)
                 {
+                    // return to main menu
                     loadScene(enterMainMenu, exitMainMenu);
+                }
+                else if (keyInfo.Key == ConsoleKey.F1)
+                {
+                    // save to file
+                    m_Progress = new PlayerProgress();
+                    m_Progress.Situation = DialogueSystem.Instance.CurrSitName;
+                    m_Progress.GlobalVariables = DialogueSystem.Instance.GlobalVariables;
+                    m_Progress.VisitedSituation = DialogueSystem.Instance.VisitedSituation;
+
+                    PlayerProgress.SaveToFile(m_Progress, c_SaveFileName);
+
+                    FrameLogger.LogError("SAVE COMPLETE! >>> press enter to continue <<<\n\n");
+                }
+                else if (keyInfo.Key == ConsoleKey.F2)
+                {
+                    // load from file
+                    m_LoadSaveFile = true;
+                    loadScene(enterInGame, exitInGame);
                 }
                 else
                 {
@@ -239,6 +266,8 @@ namespace Sandbox
                     FrameLogger.Log(info.ToString());
                 }
 
+                FrameLogger.Log("");
+
                 foreach (var variable in DialogueSystem.Instance.GlobalVariables)
                 {
                     StringBuilder info = new StringBuilder();
@@ -246,7 +275,6 @@ namespace Sandbox
                     FrameLogger.Log(info.ToString());
                 }
 
-                FrameLogger.Log("");
                 #endregion
 
                 switch (m_InGameState)
@@ -523,12 +551,27 @@ namespace Sandbox
             // load save file if there's one, or flag is set
             if (m_LoadSaveFile)
             {
-                DialogueSystem.Instance.Load("FirstVessel", new Dictionary<string, int>(), new HashSet<string>());
+                if (System.IO.File.Exists(c_SaveFileName))
+                {
+                    m_Progress = PlayerProgress.LoadFromFile(c_SaveFileName);
+                }
+                else
+                {
+                    m_Progress = new PlayerProgress();
+                    m_Progress.Situation = "FirstVessel";
+                    m_Progress.GlobalVariables = new Dictionary<string, int>();
+                    m_Progress.VisitedSituation = new HashSet<string>();
+                }
             }
             else
             {
-                DialogueSystem.Instance.Load("FirstVessel", new Dictionary<string, int>(), new HashSet<string>());
+                m_Progress = new PlayerProgress();
+                m_Progress.Situation = "FirstVessel";
+                m_Progress.GlobalVariables = new Dictionary<string, int>();
+                m_Progress.VisitedSituation = new HashSet<string>();
             }
+
+            DialogueSystem.Instance.Load(m_Progress.Situation, m_Progress.GlobalVariables, m_Progress.VisitedSituation);
         }
 
         private void exitMainMenu()
