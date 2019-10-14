@@ -590,6 +590,8 @@ namespace Sandbox
             m_HintBannerText.text = "[F8] to mute/unmute audio, [F9] to turn on/off debug mode";
             m_HintBannerText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
 
+            AudioManager.Instance.OnMusicQueueEmptied += playSpaceOddity;
+
             // Final setup
             selectMainMenuOption(m_CurrMenuSelection);
         }
@@ -837,7 +839,7 @@ namespace Sandbox
 
         private void exitMainMenu()
         {
-            // nothing
+            AudioManager.Instance.OnMusicQueueEmptied -= playSpaceOddity;
         }
 
         private void exitInGame()
@@ -858,7 +860,7 @@ namespace Sandbox
         private void playSpaceOddity()
         {
             #region Audio
-            /*
+
             AudioManager.Instance.PlayNote(Note.Do, 400);
             AudioManager.Instance.PlayNote(Note.Do, 200);
             AudioManager.Instance.PlayNote(Note.Do, 600);
@@ -961,7 +963,6 @@ namespace Sandbox
 
             AudioManager.Instance.DelayMusic(1600);
             
-            */
             // Now it's time to leave the capsule if you dare
             AudioManager.Instance.PlayNote(Note.LaL, 400);
             AudioManager.Instance.PlayNote(Note.SiL, 400);
@@ -978,6 +979,104 @@ namespace Sandbox
             AudioManager.Instance.PlayNote(Note.Mi, 200);
             AudioManager.Instance.PlayNote(Note.Re, 200);
             AudioManager.Instance.PlayNote(Note.Do, 600);
+
+
+            AudioManager.Instance.DelayMusic(2000);
+
+            // Ground control to major Tom, your circuit's dead
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 500);
+            AudioManager.Instance.PlayNote(Note.Mi, 700);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+
+            // there's something wrong, can you hear me major tom
+            AudioManager.Instance.PlayNote(Note.LaL, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Mi, 400);
+
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Mi, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+
+            AudioManager.Instance.DelayMusic(800);
+
+            // can you hear major tom
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Mi, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+
+            AudioManager.Instance.DelayMusic(800);
+            
+            // can you hear major tom
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Mi, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+
+            // can you, here  am I sitting in a tin can
+            AudioManager.Instance.DelayMusic(800);
+
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Mi, 3000);
+            AudioManager.Instance.PlayNote(Note.Re, 500);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 300);
+            AudioManager.Instance.PlayNote(Note.SiL, 500);
+            AudioManager.Instance.PlayNote(Note.SoL, 500);
+
+            AudioManager.Instance.DelayMusic(2000);
+            
+            // far  a bove the world
+            AudioManager.Instance.PlayNote(Note.Mi, 2400);
+            AudioManager.Instance.PlayNote(Note.Mi, 300);
+            AudioManager.Instance.PlayNote(Note.Re, 700);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 800);
+
+            AudioManager.Instance.DelayMusic(3200);
+
+            // planet earth is blue
+            AudioManager.Instance.PlayNote(Note.Re, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+            AudioManager.Instance.PlayNote(Note.Re, 600);
+            AudioManager.Instance.PlayNote(Note.Mi, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 600);
+
+            AudioManager.Instance.DelayMusic(200);
+
+            // and there is nothing I can do
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 600);
+            AudioManager.Instance.PlayNote(Note.Do, 400);
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+            AudioManager.Instance.PlayNote(Note.LaL, 1200);
+
+            AudioManager.Instance.DelayMusic(3600);
 
             #endregion
         }
