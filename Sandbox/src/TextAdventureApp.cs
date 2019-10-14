@@ -105,7 +105,9 @@ namespace Sandbox
 
             LandingEarth,
 
-            ShowEndingText
+            ShowEndingText,
+
+            Finish
         }
 
         #region Reference
@@ -120,7 +122,8 @@ namespace Sandbox
         private UINode m_EarthCutNode;
         private UINode m_SmallModuleNode;
 
-        private SingleColorCanvas m_EndingText;
+        private TextBox m_EndingText;
+        private TextBox m_PressESCToLeaveText;
 
         #endregion
 
@@ -132,6 +135,10 @@ namespace Sandbox
         private bool m_ModuleIsLeft = false;
         private float m_ShakeTimer = 0;
         private float m_LiftOffMoveTimer = 0;
+        private float m_EndingTextTimer = 0;
+        private int m_CurrCreditLine = 0;
+
+        private string[] m_CreditLines;
 
         private const float c_ShakingDuration = 3.5f;
         private const float c_ShakingCycle = 0.08f;
@@ -142,8 +149,21 @@ namespace Sandbox
         private const float c_MoveRightToLeftDuration = 6.5f;
         private const float c_MoveTimePerPixel = 0.1f;
 
-        private const float c_SmallMoveDuration = 70.0f;
-        private const float c_SmallMoveTimePerPixel = 1.55f;
+        private const float c_SmallMoveDuration = 0.5f;
+        private const float c_SmallMoveTimePerPixel = 1.5f;
+
+        private const float c_EndingTextDuration = 75;
+        private const float c_EndingTextTimePerSenctence = 5;
+
+        private const string c_CreditsRoll = "A GAME BY TA DAVID YU\n" +
+            "LAME WRITTER - TA DAVID YU\n" +
+            "DESIGNER - TA DAVID YU\n" +
+            "PROGRAMMER - TA DAVID YU\n" +
+            "ARTIST - TA DAVID YU / ASCII ART ARCHIVE\n" +
+            "MUSIC - SPACE ODDITY - DAVID BOWIE\n" +
+            "ACTOR - JONAS ZIMMER\n" +
+            "THANKS FOR PLAYING\n" +
+            "THE END - ta-david-yu.github.io/about-me/";
 
         #endregion
 
@@ -466,15 +486,40 @@ namespace Sandbox
                     if (m_Timer > c_SmallMoveDuration)
                     {
                         m_EndingState = EndingState.ShowEndingText;
+                        m_EndingText.Node.IsActive = true;
                         m_Timer = 0;
                     }
                 }
                 else if (m_EndingState == EndingState.ShowEndingText)
                 {
+                    if (m_SubTimer > c_SmallMoveTimePerPixel)
+                    {
+                        m_SmallModuleNode.Translate(new Vector2Int(-1, 0));
+                        m_SubTimer = 0;
+                    }
+
+                    m_EndingTextTimer += second;
+                    if (m_EndingTextTimer > c_EndingTextTimePerSenctence)
+                    {
+                        m_CurrCreditLine++;
+
+                        if (m_CurrCreditLine < m_CreditLines.Length)
+                        {
+                            m_EndingText.text = m_CreditLines[m_CurrCreditLine];
+                        }
+
+                        m_EndingTextTimer = 0;
+                    }
+
+                    if (m_Timer > c_EndingTextDuration)
+                    {
+                        m_EndingState = EndingState.Finish;
+                        m_Timer = 0;
+                    }
                 }
                 else
                 {
-
+                    loadScene(enterMainMenu, exitMainMenu);
                 }
             }
         }
@@ -753,6 +798,8 @@ namespace Sandbox
             m_Timer = 0;
             m_SubTimer = 0;
             m_ShakeTimer = 0;
+            m_CurrCreditLine = 0;
+            m_CreditLines = c_CreditsRoll.Split('\n');
 
             playSpaceOddity();
 
@@ -852,6 +899,29 @@ namespace Sandbox
                 var spaceShipImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 8, 1), spaceShip2Node, "ModuleImage");
                 var spaceShipImage = spaceShipImageNode.AddUIComponent<Bitmap>();
                 spaceShipImage.LoadFromFile("./Assets/SmallModule.txt");
+
+
+                //
+                var textCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(50, 15, 40, 1), m_EarthCutNode, "text");
+
+                var textCanvas = textCanvasNode.AddUIComponent<SingleColorCanvas>();
+                textCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+
+                var textNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 40, 1), textCanvasNode, "textBox");
+                m_EndingText = textNode.AddUIComponent<TextBox>();
+                m_EndingText.text = m_CreditLines[m_CurrCreditLine];
+                m_EndingText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
+                m_EndingText.Node.IsActive = false;
+
+
+                var bannerNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 32, 95, 1), null, "BannerCanvas");
+                m_HintBanner = bannerNode.AddUIComponent<SingleColorCanvas>();
+                m_HintBanner.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
+                var bannerTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 95, 1), bannerNode, "BannerText");
+                m_HintBannerText = bannerTextNode.AddUIComponent<TextBox>();
+                m_HintBannerText.text = "[ESC] to skip cutscene (you can still watch it on main menu)";
+                m_HintBannerText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             }
         }
 
