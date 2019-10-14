@@ -143,7 +143,7 @@ namespace Sandbox
         private const float c_ShakingCycle = 0.08f;
 
         private const float c_LiftoffDuration = 2.7f;
-        private const float c_LiftOffTimePerPixel = 0.27f;
+        private const float c_LiftOffTimePerPixel = 0.4f;
 
         private const float c_MoveRightToLeftDuration = 6.5f;
         private const float c_MoveTimePerPixel = 0.1f;
@@ -192,6 +192,8 @@ namespace Sandbox
                 m_Progress.Situation = "FirstModule";
                 m_Progress.GlobalVariables = new Dictionary<string, int>();
                 m_Progress.VisitedSituation = new HashSet<string>();
+
+                PlayerProgress.SaveToFile(m_Progress, c_SaveFileName);
             }
 
             enterMainMenu();
@@ -776,7 +778,10 @@ namespace Sandbox
             // load save file if there's one, or flag is set
             if (m_LoadSaveFile)
             {
-                m_Progress = PlayerProgress.LoadFromFile(c_SaveFileName);
+                if (System.IO.File.Exists(c_SaveFileName))
+                {
+                    m_Progress = PlayerProgress.LoadFromFile(c_SaveFileName);
+                }
             }
             else
             {
