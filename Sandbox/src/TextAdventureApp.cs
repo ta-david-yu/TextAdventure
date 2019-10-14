@@ -123,7 +123,6 @@ namespace Sandbox
         private UINode m_SmallModuleNode;
 
         private TextBox m_EndingText;
-        private TextBox m_PressESCToLeaveText;
 
         #endregion
 
@@ -653,8 +652,6 @@ namespace Sandbox
             m_HintBannerText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
 
 
-            AudioManager.Instance.OnMusicQueueEmptied += playSpaceOddity;
-
             // Final setup
             selectMainMenuOption(m_CurrMenuSelection);
         }
@@ -927,7 +924,6 @@ namespace Sandbox
 
         private void exitMainMenu()
         {
-            AudioManager.Instance.OnMusicQueueEmptied -= playSpaceOddity;
         }
 
         private void exitInGame()
