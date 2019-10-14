@@ -36,6 +36,7 @@ namespace Sandbox
         private TextBox m_NewGameText;
         private TextBox m_LoadGameText;
         private TextBox m_ExitText;
+        private TextBox m_CutsceneBtnTxt;
 
         private int m_CurrMenuSelection = 0;
 
@@ -47,7 +48,7 @@ namespace Sandbox
         private const int c_MenuOptionAnchor = 3;
         private const int c_MenuOptionOffset = 2;
 
-        private static readonly List<string> c_OptionTexts = new List<string>() { "NEW LAUNCH", "CONTINUE", "EXIT" };
+        private static readonly List<string> c_OptionTexts = new List<string>() { "NEW LAUNCH", "CONTINUE", "EXIT", "ENDING  CUTSCENE" };
 
         #endregion
 
@@ -560,6 +561,22 @@ namespace Sandbox
 
                 m_MainOptionTextes.Add(m_ExitText);
 
+                /// if Clear, add ending cutscene
+                if (m_Progress.HasClearedGame)
+                {
+                    txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(3, c_MenuOptionAnchor + c_MenuOptionOffset * 3, 28, 3), m_MainMenuNode, "Text3-Canvas");
+                    canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
+                    canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
+
+                    var endingNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1, 23, 1), txtCanvasNode, "EXIT");
+                    m_CutsceneBtnTxt = endingNode.AddUIComponent<TextBox>();
+                    m_CutsceneBtnTxt.text = "ENDING CUTSCENE";
+                    m_CutsceneBtnTxt.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+                    m_CutsceneBtnTxt.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+                    m_MainOptionTextes.Add(m_CutsceneBtnTxt);
+                }
+
                 // - Hint
                 txtCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(2, c_MenuOptionAnchor + 9, 30, 3), m_MainMenuNode, "Hint-Canvas");
                 canvas = txtCanvasNode.AddUIComponent<SingleColorCanvas>();
@@ -589,6 +606,7 @@ namespace Sandbox
             m_HintBannerText = bannerTextNode.AddUIComponent<TextBox>();
             m_HintBannerText.text = "[F8] to mute/unmute audio, [F9] to turn on/off debug mode";
             m_HintBannerText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
 
             AudioManager.Instance.OnMusicQueueEmptied += playSpaceOddity;
 
@@ -1118,6 +1136,9 @@ namespace Sandbox
                 case 2:
                     IsRunning = false;
                     break;
+                case 3:
+                    loadScene(enterEnding, exitEnding);
+                    break;
             }
         }
         #endregion
@@ -1146,6 +1167,7 @@ namespace Sandbox
             else if (m_IsFinished)
             {
                 m_Progress.HasClearedGame = true;
+                PlayerProgress.SaveToFile(m_Progress, c_SaveFileName);
                 loadScene(enterEnding, exitEnding);
             }
             else
