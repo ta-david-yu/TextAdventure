@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Threading.Tasks;
 using DYTA.Math;
 
 namespace DYTA.Render
@@ -52,12 +52,29 @@ namespace DYTA.Render
 
             var worldPos = Node.WorldAnchor;
 
-            for (int y = 0; y < Node.Bounds.Height; y++)
+
+            /*
+            Parallel.For(0, Node.Bounds.Height, y =>
             {
                 Console.SetCursorPosition(worldPos.X + Node.Bounds.Min.X + 0, worldPos.Y + Node.Bounds.Min.Y + y);
                 var line = m_PixelBuffer[y];
                 Console.WriteLine(line);
+            });*/
+            
+            for (int y = 0; y < Node.Bounds.Height; y++)
+            {
+                /*
+                for (int x = 0; x < Node.Bounds.Width; x++)
+                {
+                    Console.SetCursorPosition(worldPos.X + Node.Bounds.Min.X + x, worldPos.Y + Node.Bounds.Min.Y + y);
+                    Console.Write(m_PixelBuffer[y][x]);
+                }
+                */
+                Console.SetCursorPosition(worldPos.X + Node.Bounds.Min.X + 0, worldPos.Y + Node.Bounds.Min.Y + y);
+                var line = m_PixelBuffer[y];
+                Console.WriteLine(line);
             }
+
 
             Console.BackgroundColor = bgCol;
             Console.ForegroundColor = frCol;

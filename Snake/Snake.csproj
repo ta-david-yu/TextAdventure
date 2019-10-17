@@ -3,10 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <ApplicationIcon />
-    <StartupObject />
-    <Product>SpaceBoy</Product>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\DYTA\DYTA.csproj" />
   </ItemGroup>
