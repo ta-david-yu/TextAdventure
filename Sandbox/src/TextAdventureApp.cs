@@ -174,7 +174,7 @@ namespace Sandbox
 
         #endregion
 
-        public TextAdventureApp(RectInt bounds, PixelColor color) : base(bounds, color)
+        public TextAdventureApp(Vector2Int windowSize, PixelColor color) : base(windowSize, color)
         {
         }
 

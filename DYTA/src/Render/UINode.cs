@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
-
+using System.Threading.Tasks;
 using DYTA.Math;
 
 namespace DYTA.Render
@@ -12,20 +12,6 @@ namespace DYTA.Render
         #region Engine
         public class Engine
         {
-            class RenderUnit
-            {
-                public Vector2Int ParentAnchor { get; set; }
-                public UINode UINode { get; set; }
-
-                public RenderUnit(Vector2Int anchor, UINode node)
-                {
-                    ParentAnchor = anchor;
-                    UINode = node;
-                }
-            }
-
-            private static readonly object s_Lock = new object();
-
             private static Engine s_Instance = null;
             public static Engine Instance
             {
@@ -42,13 +28,17 @@ namespace DYTA.Render
                 }
             }
 
-            public static void CreateSingleton(Math.RectInt bounds, PixelColor color)
+            public static void CreateSingleton(Vector2Int windowSize, PixelColor color)
             {
-                s_Instance = new Engine(bounds, color);
+                s_Instance = new Engine(windowSize, color);
 
-                RectInt bound = new RectInt(bounds.Max, new Vector2Int(120, 15));
+                // create debug area
+                RectInt bound = new RectInt(0, windowSize.Y, 120, 15);
                 FrameLogger.CreateSingleton(bound);
             }
+
+            public Pixel[,] FrontBuffer { get; set; }
+            public Pixel[,] BackBuffer { get; set; }
 
             public bool IsDelayedCleanup { get; private set; } = false;
             public int NodeIdCounter { get; private set; } = 0;
@@ -57,21 +47,40 @@ namespace DYTA.Render
 
             public SingleColorCanvas RootCanvas { get; private set; }
 
-            private Engine(Math.RectInt mainBounds, PixelColor color)
+            private Engine(Vector2Int windowSize, PixelColor color)
             {
-                init(mainBounds, color);
+                init(windowSize, color);
             }
 
-            private void init(Math.RectInt mainBounds, PixelColor color)
+            private void init(Vector2Int windowSize, PixelColor color)
             {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+
+                Console.Clear();
+
                 NodeIdCounter = 0;
-                RootNode = new UINode(NodeIdCounter, mainBounds, "Root");
+                RootNode = new UINode(NodeIdCounter, new RectInt(Vector2Int.Zero, windowSize), "Root");
                 NodeIdCounter++;
 
                 RootCanvas = RootNode.AddUIComponent<SingleColorCanvas>();
                 RootCanvas.CanvasPixelColor = color;
 
                 RootNode.ParentCanvas = RootCanvas;
+
+                // init buffers
+                Pixel emptyPixel = new Pixel(' ', PixelColor.DefaultColor);
+                FrontBuffer = new Pixel[RootNode.Bounds.Width, RootNode.Bounds.Height];
+                BackBuffer = new Pixel[RootNode.Bounds.Width, RootNode.Bounds.Height];
+
+                Parallel.For(0, RootNode.Bounds.Height, (y) =>
+                {
+                    for (int x = 0; x < RootNode.Bounds.Width; x++)
+                    {
+                        FrontBuffer[x, y] = emptyPixel;
+                        BackBuffer[x, y] = emptyPixel;
+                    }
+                });
             }
 
             public UINode CreateNode(Math.RectInt nodeBounds, UINode parent = null, string name = "")
@@ -97,9 +106,9 @@ namespace DYTA.Render
                 int index = 0;
                 foreach (var node in UINode.Engine.Instance.NodeTreeTraverse)
                 {
-                    if (node.ParentCanvas.IsDirty || (node.Canvas != null && node.Canvas.IsDirty))
+                    //if (node.ParentCanvas.IsDirty || (node.Canvas != null && node.Canvas.IsDirty))
                     {
-                        node.PreRenderUIs();
+                        node.PreRender();
 
                         /*
                         var info = string.Empty;
@@ -114,17 +123,19 @@ namespace DYTA.Render
             }
 
             // Nodes with Dirty ParentCanvas are rendered again
-            public void RenderNodes()
+            public void RenderNodesToBuffer()
             {
                 //FrameLogger.Log("");
                 HashSet<Canvas> dirtyCanvases = new HashSet<Canvas>();
 
+                Utility.BufferUtil.ClearBuffer(FrontBuffer, RootCanvas.CanvasPixelColor);
+
                 int index = 0;
-                foreach (var node in UINode.Engine.Instance.NodeTreeTraverse)
+                foreach (var node in Instance.NodeTreeTraverse)
                 {
-                    if (node.ParentCanvas.IsDirty || (node.Canvas != null && node.Canvas.IsDirty))
+                    //if (node.ParentCanvas.IsDirty || (node.Canvas != null && node.Canvas.IsDirty))
                     {
-                        node.RenderUIs();
+                        node.RenderToBuffer(FrontBuffer);
                         dirtyCanvases.Add(node.ParentCanvas);
                         /*
                         var info = string.Empty;
@@ -143,18 +154,28 @@ namespace DYTA.Render
                 }
             }
 
+            public void DrawToConsole()
+            {
+                IReadOnlyCollection<Vector2Int> deltas = Utility.BufferUtil.CompareBuffers(FrontBuffer, BackBuffer);
+
+                foreach (var pos in deltas)
+                {
+                    ref Pixel pixel = ref FrontBuffer[pos.X, pos.Y];
+                    BackBuffer[pos.X, pos.Y] = pixel;
+
+                    Console.SetCursorPosition(pos.X, pos.Y);
+                    Console.ForegroundColor = pixel.Color.ForegroundColor;
+                    Console.BackgroundColor = pixel.Color.BackgroundColor;
+                    Console.Write(pixel.Character);
+                }
+                
+            }
+
             public void Destruction()
             {
                 var color = new PixelColor(RootCanvas.CanvasPixelColor.BackgroundColor, RootCanvas.CanvasPixelColor.ForegroundColor);
                 var bounds = RootNode.Bounds;
-                init(bounds, color);
-                IsDelayedCleanup = false;
-            }
-
-            // Clear all nodes
-            public void CleanUp()
-            {
-                IsDelayedCleanup = true;
+                init(bounds.Size, color);
             }
         }
         #endregion
@@ -286,7 +307,7 @@ namespace DYTA.Render
             return null;
         }
 
-        public void PreRenderUIs()
+        public void PreRender()
         {
             for (int i = 0; i < UIComponents.Count; i++)
             {
@@ -296,12 +317,12 @@ namespace DYTA.Render
 
         }
 
-        public void RenderUIs()
+        public void RenderToBuffer(Pixel[,] buffer)
         {
             for (int i = 0; i < UIComponents.Count; i++)
             {
                 var ui = UIComponents[i];
-                ui.Render();
+                ui.RenderToBuffer(buffer);
             }
         }
 

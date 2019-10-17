@@ -19,7 +19,7 @@ namespace Sandbox
                 Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
             }
 
-            var app = new TextAdventureApp(new DYTA.Math.RectInt(0, 0, 95, 37), new PixelColor(ConsoleColor.Black, ConsoleColor.White));
+            var app = new TextAdventureApp(new DYTA.Math.Vector2Int(95, 37), new PixelColor(ConsoleColor.Black, ConsoleColor.White));
 
             app.Run();
 

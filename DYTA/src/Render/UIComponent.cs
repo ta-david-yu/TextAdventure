@@ -12,7 +12,7 @@ namespace DYTA.Render
         public virtual void PreRender() { }
 
         // draw on the cmd line
-        public virtual void Render() { }
+        public virtual void RenderToBuffer(Pixel[,] buffer) { }
 
         public virtual void OnNodeSizeChanged(Math.Vector2Int size) { }
 

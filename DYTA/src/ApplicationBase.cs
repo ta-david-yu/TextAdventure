@@ -1,4 +1,5 @@
-﻿using DYTA.Render;
+﻿using DYTA.Math;
+using DYTA.Render;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,9 +16,9 @@ namespace DYTA
         private Action m_NextSceneInitCall = delegate { };
         private Action m_ExitSceneCall = delegate { };
 
-        public ApplicationBase(Math.RectInt bounds, PixelColor color)
+        public ApplicationBase(Vector2Int windowSize, PixelColor color)
         {
-            UINode.Engine.CreateSingleton(bounds, color);
+            UINode.Engine.CreateSingleton(windowSize, color);
         }
 
         public void Run()
@@ -56,16 +57,11 @@ namespace DYTA
 
                 // rendering
                 UINode.Engine.Instance.PreRenderNodes();
-                UINode.Engine.Instance.RenderNodes();
+                UINode.Engine.Instance.RenderNodesToBuffer();
+                UINode.Engine.Instance.DrawToConsole();
 
                 // late logic update, after render
                 postRenderUpdate(timeStep);
-
-                // rendering destruction
-                if (UINode.Engine.Instance.IsDelayedCleanup)
-                {
-                    UINode.Engine.Instance.Destruction();
-                }
 
                 // logging
                 FrameLogger.DrawFrameLog();

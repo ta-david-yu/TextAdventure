@@ -38,7 +38,7 @@ namespace Snake
 
 
 
-        public SnakeApplication(RectInt bounds, PixelColor color) : base(bounds, color)
+        public SnakeApplication(Vector2Int windowSize, PixelColor color) : base(windowSize, color)
         {
 
         }
