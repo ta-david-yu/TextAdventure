@@ -1263,7 +1263,6 @@ namespace Sandbox
                     m_IsFinished = true;
                 }
 
-                // TODO: load image to replace
                 var path = "./Assets/" + nextSit.LocationName + ".txt";
                 if (System.IO.File.Exists(path))
                 {

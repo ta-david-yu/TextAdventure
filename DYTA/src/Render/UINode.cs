@@ -59,6 +59,8 @@ namespace DYTA.Render
 
                 Console.Clear();
 
+                Console.SetCursorPosition(0, 0);
+
                 NodeIdCounter = 0;
                 RootNode = new UINode(NodeIdCounter, new RectInt(Vector2Int.Zero, windowSize), "Root");
                 NodeIdCounter++;

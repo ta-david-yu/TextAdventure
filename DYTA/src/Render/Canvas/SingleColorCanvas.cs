@@ -26,6 +26,8 @@ namespace DYTA.Render
 
         private List<StringBuilder> m_CharacterBuffer;
 
+        private Dictionary<Vector2Int, char> m_DrawBuffer;
+
         private string m_ClearLine;
 
         public SingleColorCanvas()
@@ -52,6 +54,18 @@ namespace DYTA.Render
 
             var worldPos = Node.WorldAnchor;
 
+            foreach (var drawCall in m_DrawBuffer)
+            {
+                int worldX = worldPos.X + Node.Bounds.Min.X + drawCall.Key.X;
+                int worldY = worldPos.Y + Node.Bounds.Min.Y + drawCall.Key.Y;
+
+                if (worldX >= 0 && worldX < buffer.GetLength(0) && worldY >= 0 && worldY < buffer.GetLength(1))
+                {
+                    buffer[worldX, worldY] = new Pixel(drawCall.Value, CanvasPixelColor);
+                }
+            }
+
+            /*
             for (int y = 0; y < Node.Bounds.Height; y++)
             {
                 for (int x = 0; x < Node.Bounds.Width; x++)
@@ -65,17 +79,9 @@ namespace DYTA.Render
                     {
                         buffer[worldX, worldY] = new Pixel(ch, CanvasPixelColor);
                     }
-
-                    //Console.SetCursorPosition(worldPos.X + Node.Bounds.Min.X + x, worldPos.Y + Node.Bounds.Min.Y + y);
-                    //Console.Write(m_CharacterBuffer[y][x]);
                 }
-                /*
-                Console.SetCursorPosition(worldPos.X + Node.Bounds.Min.X + 0, worldPos.Y + Node.Bounds.Min.Y + y);
-                var line = m_PixelBuffer[y];
-                Console.WriteLine(line);
-                */
             }
-
+            */
 
             Console.BackgroundColor = bgCol;
             Console.ForegroundColor = frCol;
@@ -83,6 +89,7 @@ namespace DYTA.Render
 
         public override void ResetBuffer()
         {
+            /*
             if (m_ClearLine == null)
             {
                 m_ClearLine = new string(' ', Node.Bounds.Width);
@@ -103,10 +110,22 @@ namespace DYTA.Render
                     m_CharacterBuffer[y] = new StringBuilder(m_ClearLine);
                 }
             }
+            */
+
+            m_DrawBuffer = new Dictionary<Vector2Int, char>();
         }
 
         public override void SetPixel(char character, Vector2Int pos)
         {
+            try
+            {
+                m_DrawBuffer.Add(pos, character);
+            }
+            catch
+            {
+                m_DrawBuffer[pos] = character;
+            }
+            /*
             var bounds = Node.Bounds;
             var canvasPos = bounds.Position + pos;
 
@@ -114,7 +133,7 @@ namespace DYTA.Render
             if (insideCanvas)
             {
                 m_CharacterBuffer[pos.Y][pos.X] = character;
-            }
+            }*/
         }
     }
 }

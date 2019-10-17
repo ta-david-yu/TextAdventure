@@ -110,6 +110,14 @@ namespace DYTA.Math
                 point.Y >= Min.Y && point.Y <= Max.Y;
         }
 
+        public bool Overlap(RectInt other)
+        {
+            return Min.X <= other.Max.X &&
+                   Max.X >= other.Min.X &&
+                   Min.Y <= other.Max.Y &&
+                   Max.Y >= other.Min.Y;
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is RectInt)
