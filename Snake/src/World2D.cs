@@ -46,7 +46,10 @@ namespace Snake
 
         public Platform CreatePlatform(Vector2Int pos, Vector2Int size)
         {
-            return null;
+            var platform = new Platform(this, new RectInt(pos, size));
+            platform.Initialize();
+            m_Platforms.Add(platform);
+            return platform;
         }
 
         public void Update(float timeStep)

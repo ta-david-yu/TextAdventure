@@ -32,7 +32,7 @@ namespace Snake
             {
                 foreach (var character in m_Characters)
                 {
-                    // TODO
+                    // TODO: move character
                 }
             }
             else if (m_Direction == Direction.Right)
