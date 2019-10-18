@@ -91,7 +91,15 @@ namespace DYTA.Render
             foreach (var pos in Node.Bounds.AllPositionsWithin)
             {
                 var dataPos = pos - Node.Bounds.Position;
-                Node.ParentCanvas.SetPixel(Data[dataPos.Y][dataPos.X], pos);
+                try
+                {
+                    Node.ParentCanvas.SetPixel(Data[dataPos.Y][dataPos.X], pos);
+                }
+                catch
+                {
+                    FrameLogger.LogError(Data[0].ToString());
+                    FrameLogger.LogError("Error - " + dataPos.ToString());
+                }
             }
         }
     }

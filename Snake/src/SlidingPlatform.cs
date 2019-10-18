@@ -13,16 +13,13 @@ namespace Snake
             Left
         }
 
-        private Direction m_Direction = Direction.Left;
+        private Direction m_Direction = Direction.Right;
 
         private Dictionary<int, float> m_PlatformMoveTimer = new Dictionary<int, float>();
 
         private const float c_PlatformMoveDuration = 0.5f;
 
-        public SlidingPlatform(World2D world, RectInt collider, Direction dir) : base(world, collider)
-        {
-            m_Direction = dir;
-        }
+        public SlidingPlatform() { }
 
         public override void Update(float timeStep)
         {

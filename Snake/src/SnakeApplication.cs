@@ -58,7 +58,8 @@ namespace Snake
             layoutBitmap.LoadFromFile("./Assets/Layout.txt", Bitmap.DrawType.Sliced);
 
             World = new World2D(2, new RectInt(Vector2Int.One, c_PlaygroundSize));
-            World.CreatePlatform(new Vector2Int(0, c_PlaygroundSize.Y - 1), new Vector2Int(c_PlaygroundSize.X, 0));
+            World.CreatePlatform(new Vector2Int(0, c_PlaygroundSize.Y / 3 - 1), new Vector2Int(c_PlaygroundSize.X / 3, 1));
+            World.CreatePlatform(new Vector2Int(10, c_PlaygroundSize.Y / 2 - 1), new Vector2Int(c_PlaygroundSize.X / 3, 1));
         }
 
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)

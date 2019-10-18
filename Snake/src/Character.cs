@@ -44,8 +44,8 @@ namespace Snake
         private string[] m_RightBitmap;
         private string[] m_LeftBitmap;
 
-        private const float c_MoveDuration = 0.005f;
-        private const float c_GravityTimePerPixel = 0.15f;
+        private const float c_MoveDuration = 0.015f;
+        private const float c_GravityTimePerPixel = 0.02f;
 
         public Character() { }
 
@@ -72,21 +72,24 @@ namespace Snake
         public void TurnLeft()
         {
             Direction = CharacterDirection.Left;
+            m_MoveTimer = c_MoveDuration;
             Image.Load(m_LeftBitmap);
         }
 
         public void TurnRight()
         {
             Direction = CharacterDirection.Right;
+            m_MoveTimer = c_MoveDuration;
             Image.Load(m_RightBitmap);
         }
 
         public void Update(float timeStep)
         {
-            FrameLogger.Log(timeStep.ToString());
+            //FrameLogger.Log(timeStep.ToString());
 
-            // TODO, reset Time on turn, on ground
             m_MoveTimer += timeStep;
+
+            // TODO, reset Timer  on ground
             m_GravityTimer += timeStep;
 
             Velocity = Vector2Int.Zero;
@@ -101,7 +104,7 @@ namespace Snake
                 Velocity += new Vector2Int(0, 1);
                 m_GravityTimer = 0;
             }
-            FrameLogger.Log(Velocity.ToString());
+            //FrameLogger.Log(Velocity.ToString());
         }
 
         public void SetPosition(Vector2Int position)

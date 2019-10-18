@@ -29,7 +29,7 @@ namespace Snake
         // Tower movement
         private float m_TowerMoveTimer = 0;
 
-        private const float c_TowerMoveDuration = 1.0f;
+        private const float c_TowerMoveDuration = 0.25f;
 
         public World2D(int numOfPlayers, RectInt bounds)
         {
@@ -46,22 +46,22 @@ namespace Snake
 
         public Platform CreatePlatform(Vector2Int pos, Vector2Int size)
         {
-            var platform = new Platform(this, new RectInt(pos, size));
-            platform.Initialize();
+            var platform = new Platform();
+            platform.Initialize(this, new RectInt(pos, size));
             m_Platforms.Add(platform);
             return platform;
         }
 
         public void Update(float timeStep)
         {
-            /*
+            
             m_TowerMoveTimer += timeStep;
 
             if (m_TowerMoveTimer > c_TowerMoveDuration)
             {
                 TowerTopNode.Translate(new DYTA.Math.Vector2Int(0, -1));
                 m_TowerMoveTimer = 0;
-            }*/
+            }
 
             // update platform
             for (int i = 0; i < m_Platforms.Count; i++)
@@ -159,7 +159,7 @@ namespace Snake
                 var newPos = character.Collider.Position + velocity;
                 character.SetPosition(newPos);
 
-                FrameLogger.Log(velocity + newPos.ToString());
+                //FrameLogger.Log(velocity + newPos.ToString());
             }
         }
     }

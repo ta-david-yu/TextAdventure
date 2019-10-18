@@ -87,6 +87,11 @@ namespace DYTA.Render
 
             public UINode CreateNode(Math.RectInt nodeBounds, UINode parent = null, string name = "")
             {
+                if (nodeBounds.Size.Y <= 0 || nodeBounds.Size.X <= 0)
+                {
+                    throw new ArgumentOutOfRangeException("nodeBounds size should not be negative or zero.");
+                }
+
                 var node = new UINode(NodeIdCounter, nodeBounds, name);
                 NodeIdCounter += 1;
 
