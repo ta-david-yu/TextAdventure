@@ -31,7 +31,7 @@ namespace Snake
 
         #endregion
 
-        private static readonly Vector2Int c_PlaygroundSize = new Vector2Int(50, 50);
+        private static readonly Vector2Int c_PlaygroundSize = new Vector2Int(50, 40);
 
         private static readonly ConsoleKey[,] c_InputTable = new ConsoleKey[,]
         {
@@ -57,7 +57,7 @@ namespace Snake
             var layoutBitmap = playgroundLayoutNode.AddUIComponent<Bitmap>();
             layoutBitmap.LoadFromFile("./Assets/Layout.txt", Bitmap.DrawType.Sliced);
 
-            World = new World2D(2, new RectInt(Vector2Int.One, c_PlaygroundSize));
+            World = new World2D(1, new RectInt(Vector2Int.One, c_PlaygroundSize));
         }
 
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)

@@ -6,7 +6,7 @@ namespace Snake
     class Program
     {
         const int c_Width = 60;
-        const int c_Height = 55;
+        const int c_Height = 50;
 
         static void Main(string[] args)
         {

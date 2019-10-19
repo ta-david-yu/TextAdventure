@@ -42,8 +42,12 @@ namespace Snake
         private string[] m_RightBitmap;
         private string[] m_LeftBitmap;
 
-        private const float c_MoveDuration = 0.015f;
-        private const float c_GravityTimePerPixel = 0.02f;
+        private const float c_MoveDuration = 0.001f;
+        private const float c_GravityTimePerPixel = 0.01f;
+
+        private const int c_MaxSpeedY = 1;
+
+        private static readonly ConsoleColor[] c_CharacterColors = new ConsoleColor[]{ ConsoleColor.Yellow, ConsoleColor.Green, ConsoleColor.Blue };
 
         public Character() { }
 
@@ -52,25 +56,17 @@ namespace Snake
             Id = id;
 
             m_World = world;
-            Collider = new RectInt(pos, new Vector2Int(3, 3));
+            Collider = new RectInt(pos, new Vector2Int(1, 2));
             Direction = dir;
 
             RenderNode = UINode.Engine.Instance.CreateNode(Collider, world.CharacterNode, "Character-Node");
             var canvas = RenderNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
 
-            var imageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 3, 3), RenderNode, "Character-Image");
+            var imageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 2), RenderNode, "Character-Image");
             Image = imageNode.AddUIComponent<Bitmap>();
             m_RightBitmap = System.IO.File.ReadAllLines("./Assets/CharacterRight.txt");
             m_LeftBitmap = System.IO.File.ReadAllLines("./Assets/CharacterLeft.txt");
-
-            StringBuilder tempStr = new StringBuilder(m_RightBitmap[1]);
-            tempStr[1] = (char)('0' + id + 1);
-            m_RightBitmap[1] = tempStr.ToString();
-
-            tempStr = new StringBuilder(m_LeftBitmap[1]);
-            tempStr[1] = (char)('0' + id + 1);
-            m_LeftBitmap[1] = tempStr.ToString();
 
             Image.Load((dir == CharacterDirection.Right) ? m_RightBitmap : m_LeftBitmap);
         }
@@ -103,13 +99,17 @@ namespace Snake
             if (IsOnGround)
             {
                 m_GravityTimer = 0;
+                Velocity = new Vector2Int(Velocity.X, 0);
             }
             else
             {
                 m_GravityTimer += timeStep;
             }
 
-            Velocity = Vector2Int.Zero;
+
+            int speedY = Velocity.Y;
+            if (speedY > c_MaxSpeedY) speedY = c_MaxSpeedY;
+            Velocity = new Vector2Int(0, speedY);
             if (m_MoveTimer > c_MoveDuration)
             {
                 Velocity += new Vector2Int(Direction == CharacterDirection.Right ? 1 : -1, 0);

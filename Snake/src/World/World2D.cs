@@ -24,7 +24,6 @@ namespace Snake
 
         private List<StaticWall> m_StaticWalls = new List<StaticWall>();
 
-        private List<Platform> m_PlatformPool = new List<Platform>();
         private List<Platform> m_Platforms = new List<Platform>();
 
         private List<HasCollision> m_AllColliders = new List<HasCollision>();
@@ -40,21 +39,20 @@ namespace Snake
 
         // Settings
         private Vector2Int m_TowerSize;
-        private int m_PlatformWidth;
 
         // Tower movement
         private float m_TowerMoveTimer = 0;
 
+        //
         private const float c_SlowestTowerMoveDuration = 0.35f;
         private const float c_FastestTowerMoveDuration = 0.15f;
 
-        private const int c_PlayerInitialHeight = 5;
+        private const int c_PlayerInitialHeight = 15;
+        private const int c_PlatformWidth = 15;
 
         public World2D(int numOfPlayers, RectInt bounds)
         {
             m_TowerSize = bounds.Size;
-
-            m_PlatformWidth = bounds.Width / 3;
 
             TowerTopNode = UINode.Engine.Instance.CreateNode(bounds, null, "TowerRoot");
             WorldStaticNode = UINode.Engine.Instance.CreateNode(bounds, null, "StaticNode");
@@ -69,26 +67,19 @@ namespace Snake
             int offset = bounds.Width / (numOfPlayers + 1);
             for (int i = 0; i < numOfPlayers; i++)
             {
-                var character = CreateCharacter(new Vector2Int(offset * (i + 1), 
-                    c_PlayerInitialHeight), 
+                var character = CreateCharacter(new Vector2Int(offset * (i + 1),
+                    c_PlayerInitialHeight),
                     (i % 2 == 0) ? CharacterDirection.Right : CharacterDirection.Left);
             }
 
-            // create platform pools
-            //m_PlatformPool
-
             // create initial platform
-            int initialPlatWidth = 11;
-            int platGap = 4;
-            for (int y = 0; y < 30; y += 10)
+            int initialPlatWidth = 12;
+            int platGap = 6;
+            for (int i = 0; i < 3; i++)
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    var platformPos = new Vector2Int(platGap + i * (platGap + initialPlatWidth), c_PlayerInitialHeight + y) - Vector2Int.Up * 10;
-                    var platformSize = new Vector2Int(initialPlatWidth, 1);
-
-                    var plaform = CreatePlatform(platformPos, platformSize);
-                }
+                var platformPos = new Vector2Int(i * (platGap + initialPlatWidth), c_PlayerInitialHeight + 2);
+                var platformSize = new Vector2Int(initialPlatWidth, 1);
+                CreatePlatform(platformPos, platformSize);
             }
         }
 
@@ -103,10 +94,30 @@ namespace Snake
 
         public Platform CreatePlatform(Vector2Int pos, Vector2Int size)
         {
-            var platform = new Platform();
-            platform.Initialize(this, new RectInt(pos, size));
-            m_Platforms.Add(platform);
-            m_AllColliders.Add(platform);
+            Platform platform = null;
+
+            // find inactive platform in the list
+            foreach (var plat in m_Platforms)
+            {
+                if (!plat.IsActive)
+                {
+                    platform = plat;
+                    platform.SetPositionAndSize(pos, size);
+                    platform.IsActive = true;
+                    break;
+                }
+            }
+
+            if (platform == null)
+            {
+
+                platform = new Platform();
+                platform.Initialize(this, new RectInt(pos, size));
+
+                m_Platforms.Add(platform);
+                m_AllColliders.Add(platform);
+            }
+
             return platform;
         }
 
@@ -123,11 +134,21 @@ namespace Snake
         {
             m_TowerMoveTimer += timeStep;
 
-            // move tower
+            // move tower, recycle platforms, generate new platforms
             if (m_TowerMoveTimer > c_SlowestTowerMoveDuration)
             {
                 TowerTopNode.Translate(new DYTA.Math.Vector2Int(0, -1));
                 m_TowerMoveTimer = 0;
+
+                // recycle
+                for (int i = 0; i < m_Platforms.Count; i++)
+                {
+                    var platform = m_Platforms[i];
+                    if (TowerTopNode.Bounds.Position.Y + platform.Collider.Position.Y < 0)
+                    {
+                        platform.IsActive = false;
+                    }
+                }
             }
 
             // update platform
@@ -144,7 +165,7 @@ namespace Snake
                 character.Update(timeStep);
             }
 
-            // update movement, collision detection
+            // update character movement, collision detection
             for (int i = 0; i < Characters.Count; i++)
             {
                 var character = Characters[i];

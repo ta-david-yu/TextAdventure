@@ -278,6 +278,12 @@ namespace DYTA.Render
             Name = name;
         }
 
+        public void SetSize(Vector2Int size)
+        {
+            Bounds = new RectInt(Bounds.Position, size);
+            SetDirty();
+        }
+
         public void SetPosition(Vector2Int pos)
         {
             Bounds = new RectInt(pos, Bounds.Size);

@@ -36,6 +36,13 @@ namespace Snake
             Image.LoadFromFile(m_ImgFilePath);
         }
 
+        public void SetPositionAndSize(Vector2Int pos , Vector2Int size)
+        {
+            Collider = new RectInt(pos, size);
+            RenderNode.SetPosition(pos);
+            RenderNode.SetSize(size);
+        }
+
         public void Update(float timeStep)
         {
             if (!IsActive)
