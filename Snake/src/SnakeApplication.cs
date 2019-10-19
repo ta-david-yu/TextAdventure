@@ -5,7 +5,7 @@ using DYTA;
 using DYTA.Math;
 using DYTA.Render;
 
-namespace Snake
+namespace NSShaft
 {
     class SnakeApplication : ApplicationBase
     {
@@ -31,12 +31,12 @@ namespace Snake
 
         #endregion
 
-        private static readonly Vector2Int c_PlaygroundSize = new Vector2Int(50, 40);
+        private static readonly Vector2Int c_PlaygroundSize = new Vector2Int(50, 25);
 
         private static readonly ConsoleKey[,] c_InputTable = new ConsoleKey[,]
         {
-            { ConsoleKey.D, ConsoleKey.A },
             { ConsoleKey.RightArrow, ConsoleKey.LeftArrow },
+            { ConsoleKey.D, ConsoleKey.A },
             { ConsoleKey.NumPad6, ConsoleKey.NumPad4 }
         };
 

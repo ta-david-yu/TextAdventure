@@ -1,12 +1,12 @@
 ﻿using System;
 using DYTA;
 
-namespace Snake
+namespace NSShaft
 {
     class Program
     {
         const int c_Width = 60;
-        const int c_Height = 50;
+        const int c_Height = 40;
 
         static void Main(string[] args)
         {

@@ -1,11 +1,12 @@
 ﻿using DYTA;
+using DYTA.Audio;
 using DYTA.Math;
 using DYTA.Render;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Snake
+namespace NSShaft
 {
     public class Platform : HasCollision
     {
@@ -41,6 +42,7 @@ namespace Snake
             Collider = new RectInt(pos, size);
             RenderNode.SetPosition(pos);
             RenderNode.SetSize(size);
+            Image.Node.SetSize(size);
         }
 
         public void Update(float timeStep)
@@ -58,22 +60,32 @@ namespace Snake
 
         }
 
-        public override void OnCharacterEnter(Character ch)
-        {
-        }
-
-        public override void OnCharacterExit(Character ch)
+        public override void OnCharacterCollision(Character ch)
         {
         }
 
         public override void OnCharacterStepOn(Character ch)
         {
             OnTopCharacters.Add(ch.Id, ch);
+            handleOnCharacterStepOn(ch);
+            ch.OnStepOnPlatform(this);
         }
 
         public override void OnCharacterLiftOff(Character ch)
         {
             OnTopCharacters.Remove(ch.Id);
+            handleOnCharacterLiftOff(ch);
+            ch.OnLeavePlatform(this);
+        }
+
+        protected virtual void handleOnCharacterStepOn(Character ch)
+        {
+            ch.AddHealth(1);
+        }
+
+        protected virtual void handleOnCharacterLiftOff(Character ch)
+        {
+
         }
 
         protected override void onIsActiveChanged(bool value)

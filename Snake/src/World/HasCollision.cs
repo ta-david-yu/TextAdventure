@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Snake
+namespace NSShaft
 {
     public abstract class HasCollision
     {
@@ -26,8 +26,7 @@ namespace Snake
 
         public Dictionary<int, Character> OnTopCharacters { get; protected set; } = new Dictionary<int, Character>();
 
-        public virtual void OnCharacterEnter(Character ch) { }
-        public virtual void OnCharacterExit(Character ch) { }
+        public virtual void OnCharacterCollision(Character ch) { }
 
         public virtual void OnCharacterStepOn(Character ch)
         {

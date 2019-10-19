@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using DYTA.Math;
 
-namespace Snake
+namespace NSShaft
 {
     class SlidingPlatform : Platform
     {
@@ -23,8 +23,6 @@ namespace Snake
 
         protected override void onUpdate(float timeStep)
         {
-            base.Update(timeStep);
-
             if (m_Direction == Direction.Left)
             {
                 foreach (var character in OnTopCharacters)
@@ -36,17 +34,6 @@ namespace Snake
             {
 
             }
-        }
-
-        public override void OnCharacterEnter(Character ch)
-        {
-            base.OnCharacterEnter(ch);
-
-        }
-
-        public override void OnCharacterExit(Character ch)
-        {
-            base.OnCharacterExit(ch);
         }
     }
 }

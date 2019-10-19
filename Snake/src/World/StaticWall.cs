@@ -4,7 +4,7 @@ using System.Text;
 using DYTA.Math;
 using DYTA.Render;
 
-namespace Snake
+namespace NSShaft
 {
     public class StaticWall : HasCollision
     {
