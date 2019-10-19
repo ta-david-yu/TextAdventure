@@ -40,6 +40,8 @@ namespace NSShaft
 
         public UINode PlatformNode { get; private set; }
 
+        public UINode BackgroundImageNode { get; private set; }
+
         // Settings
         private Vector2Int m_TowerSize;
 
@@ -118,10 +120,18 @@ namespace NSShaft
 
             m_TowerSize = bounds.Size;
 
-            TowerTopNode = UINode.Engine.Instance.CreateNode(bounds, null, "TowerRoot");
             WorldStaticNode = UINode.Engine.Instance.CreateNode(bounds, null, "StaticNode");
+            TowerTopNode = UINode.Engine.Instance.CreateNode(bounds, null, "TowerRoot");
             CharacterNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 1), TowerTopNode, "CharacterNode");
             PlatformNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 1), TowerTopNode, "PlatformNode");
+
+            // create brick wall bg
+            var canvas = WorldStaticNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
+
+            BackgroundImageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, bounds.Width - 1, bounds.Height - 1), WorldStaticNode, "BrickWall");
+            var brickImage = BackgroundImageNode.AddUIComponent<Bitmap>();
+            brickImage.LoadFromFile("./Assets/BrickWall.txt");
 
             // create death zone
             CreateDeathZone(new Vector2Int(0, 0), new Vector2Int(m_TowerSize.X - 1, 1), true);
@@ -251,7 +261,7 @@ namespace NSShaft
                 for (int i = 0; i < m_AllPlatforms.Count; i++)
                 {
                     var platform = m_AllPlatforms[i];
-                    if (TowerTopNode.Bounds.Position.Y - 1 + platform.Collider.Position.Y < 0)
+                    if (TowerTopNode.Bounds.Position.Y - 2 + platform.Collider.Position.Y < 0)
                     {
                         platform.IsActive = false;
                     }
@@ -272,7 +282,7 @@ namespace NSShaft
                     {
                         var pos = m_PreviousPlatform.Collider.Position;
                         pos.Y += c_PlatformOffsetY;
-                        pos.X = m_RandomGenerator.Next(0, m_TowerSize.X - c_PlatformWidth);
+                        pos.X = m_RandomGenerator.Next(0, m_TowerSize.X - c_PlatformWidth - 1);
 
                         int rndToken = m_RandomGenerator.Next(0, 10);
 

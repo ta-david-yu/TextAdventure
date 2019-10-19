@@ -13,16 +13,17 @@ namespace NSShaft
         {
             Menu,
             InGame,
-            GameOver
+            Tutorial
         }
+
+
+        private GameState State { get; set; }
+        private int m_NumOfPlayers = 1;
+        private bool m_OptimizedMode = false;
 
         #region GameVar
 
-        private GameState State { get; set; }
-
         private World2D World { get; set; }
-
-
 
         #endregion
 
@@ -51,7 +52,63 @@ namespace NSShaft
 
         protected override void loadInitialScene()
         {
-            FrameLogger.Toggle();
+            enterInGameScene();
+        }
+
+        protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
+        {
+            if (keyInfo.Key == ConsoleKey.F9)
+            {
+                FrameLogger.Toggle();
+            }
+            else if (keyInfo.Key == ConsoleKey.Escape)
+            {
+                loadScene(enterInGameScene, delegate { });
+            }
+            else if (keyInfo.Key == ConsoleKey.F1)
+            {
+                m_OptimizedMode = !m_OptimizedMode;
+            }
+
+            if (State == GameState.Menu)
+            {
+
+            }
+            else if (State == GameState.InGame)
+            {
+                for (int i = 0; i < World.Characters.Count; i++)
+                {
+                    var character = World.Characters[i];
+
+                    if (keyInfo.Key == c_InputTable[i, 0])
+                    {
+                        character.TurnRight();
+                    }
+                    else if (keyInfo.Key == c_InputTable[i, 1])
+                    {
+                        character.TurnLeft();
+                    }
+                }
+
+                if (keyInfo.Key == ConsoleKey.F1)
+                {
+                    World.BackgroundImageNode.IsActive = !m_OptimizedMode;
+                }
+            }
+            else if (State == GameState.Tutorial)
+            {
+
+            }
+        }
+
+        protected override void update(long timeStep)
+        {
+            World.Update((float)timeStep / 1000.0f);
+        }
+
+        private void enterInGameScene()
+        {
+            State = GameState.InGame;
 
             // frame UI
             m_PlayGroundNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_GameWindowSize + Vector2Int.One), null, "Playground-Node");
@@ -63,7 +120,7 @@ namespace NSShaft
             layoutBitmap.LoadFromFile("./Assets/Layout.txt", Bitmap.DrawType.Sliced);
 
             // game world
-            World = new World2D(2, new RectInt(Vector2Int.One, c_GameWindowSize));
+            World = new World2D(m_NumOfPlayers, new RectInt(Vector2Int.One, c_GameWindowSize));
 
             // game UI
             RectInt gameUISize = new RectInt(new Vector2Int(0, c_GameWindowSize.Y + 1), new Vector2Int(c_GameWindowSize.X + 1, 5));
@@ -88,7 +145,7 @@ namespace NSShaft
 
                 var textNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1 + i * 2, 10, 1), uiNode, "Game UI");
                 var text = textNode.AddUIComponent<TextBox>();
-                text.text = string.Format("P{0} HP: {1, 2}/{2, 2}", i+1,  10, Character.c_MaxHealth);
+                text.text = string.Format("P{0} HP: {1, 2}/{2, 2}", i + 1, 10, Character.c_MaxHealth);
                 text.horizontalAlignment = TextBox.HorizontalAlignment.Left;
                 text.verticalAlignment = TextBox.VerticalAlignment.Middle;
 
@@ -122,33 +179,18 @@ namespace NSShaft
 
             World.OnTotalLevelChanged += handleOnTotalLevelChanged;
 
+            // Setup bg settings
+            World.BackgroundImageNode.IsActive = !m_OptimizedMode;
         }
 
-        protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
+        private void enterMainMenu()
         {
-            for (int i = 0; i < World.Characters.Count; i++)
-            {
-                var character = World.Characters[i];
 
-                if (keyInfo.Key == c_InputTable[i, 0])
-                {
-                    character.TurnRight();
-                }
-                else if (keyInfo.Key == c_InputTable[i, 1])
-                {
-                    character.TurnLeft();
-                }
-            }
-
-            if (keyInfo.Key == ConsoleKey.Escape)
-            {
-                loadScene(loadInitialScene, delegate { });
-            }
         }
 
-        protected override void update(long timeStep)
+        private void enterTutorial()
         {
-            World.Update((float)timeStep / 1000.0f);
+
         }
 
         private void handleOnCharacterHpChanged(int id, int health)
