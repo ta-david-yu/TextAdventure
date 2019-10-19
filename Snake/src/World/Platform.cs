@@ -1,4 +1,5 @@
-﻿using DYTA.Math;
+﻿using DYTA;
+using DYTA.Math;
 using DYTA.Render;
 using System;
 using System.Collections.Generic;
@@ -6,20 +7,15 @@ using System.Text;
 
 namespace Snake
 {
-    public class Platform : IHasCollider
+    public class Platform : HasCollision
     {
         //
         public World2D World { get; protected set; }
-
-        public RectInt Collider { get; protected set; }
 
         //
         protected UINode RenderNode { get; private set; }
 
         public Bitmap Image { get; private set; }
-
-        //
-        protected Dictionary<int, Character> m_Characters = new Dictionary<int, Character>();
 
         //
         protected virtual string m_ImgFilePath { get; } = "./Assets/Platform.txt";
@@ -31,7 +27,7 @@ namespace Snake
             Collider = collider;
             World = world;
 
-            RenderNode = UINode.Engine.Instance.CreateNode(Collider, World.TowerTopNode, "Platform-Node");
+            RenderNode = UINode.Engine.Instance.CreateNode(Collider, World.PlatformNode, "Platform-Node");
             var canvas = RenderNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Gray, ConsoleColor.Blue);
 
@@ -40,24 +36,42 @@ namespace Snake
             Image.LoadFromFile(m_ImgFilePath);
         }
 
-        public virtual void Update(float timeStep)
+        public void Update(float timeStep)
         {
+            if (!IsActive)
+            {
+                onUpdate(timeStep);
+            }
+
             // ...
         }
 
-        public virtual void OnCharacterEnter(Character ch)
+        protected virtual void onUpdate(float timeStep)
         {
-            m_Characters.Add(ch.Id, ch);
+
         }
 
-        public virtual void OnCharacterExit(Character ch)
+        public override void OnCharacterEnter(Character ch)
         {
-            m_Characters.Remove(ch.Id);
         }
 
-        public bool IsCharacterOnThisPlatform(Character ch)
+        public override void OnCharacterExit(Character ch)
         {
-            return m_Characters.ContainsKey(ch.Id);
+        }
+
+        public override void OnCharacterStepOn(Character ch)
+        {
+            OnTopCharacters.Add(ch.Id, ch);
+        }
+
+        public override void OnCharacterLiftOff(Character ch)
+        {
+            OnTopCharacters.Remove(ch.Id);
+        }
+
+        protected override void onIsActiveChanged(bool value)
+        {
+            RenderNode.IsActive = value;
         }
     }
 }

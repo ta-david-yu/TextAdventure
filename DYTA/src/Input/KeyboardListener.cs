@@ -24,11 +24,19 @@ namespace DYTA.Input
 
         public event Action<ConsoleKeyInfo> OnKeyPressed = delegate { };
 
+        private List<ConsoleKeyInfo> m_KeyBuffer = new List<ConsoleKeyInfo>();
+
         public void QueryInput()
         {
-            if (Console.KeyAvailable)
+            m_KeyBuffer = new List<ConsoleKeyInfo>();
+            while (Console.KeyAvailable)
             {
-                OnKeyPressed.Invoke(Console.ReadKey(true));
+                m_KeyBuffer.Add(Console.ReadKey(true));
+            }
+
+            foreach (var keyInfo in m_KeyBuffer)
+            {
+                OnKeyPressed.Invoke(keyInfo);
             }
         }
     }

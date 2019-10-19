@@ -175,7 +175,9 @@ namespace DYTA.Render
                     Console.BackgroundColor = pixel.Color.BackgroundColor;
                     Console.Write(pixel.Character);
                 }
-                
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
             }
 
             public void Destruction()

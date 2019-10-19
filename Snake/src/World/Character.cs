@@ -13,13 +13,11 @@ namespace Snake
         Left,
     }
 
-    public class Character : IHasCollider
+    public class Character : HasCollision
     {
         public int Id { get; private set; }
 
         // Status
-        public RectInt Collider { get; private set; }
-
         public CharacterDirection Direction { get; private set; }
 
         public Vector2Int Velocity { get; set; }
@@ -54,17 +52,25 @@ namespace Snake
             Id = id;
 
             m_World = world;
-            Collider = new RectInt(pos, new Vector2Int(1, 2));
+            Collider = new RectInt(pos, new Vector2Int(3, 3));
             Direction = dir;
 
-            RenderNode = UINode.Engine.Instance.CreateNode(Collider, world.TowerTopNode, "Character-Node");
+            RenderNode = UINode.Engine.Instance.CreateNode(Collider, world.CharacterNode, "Character-Node");
             var canvas = RenderNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
 
-            var imageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 2), RenderNode, "Character-Image");
+            var imageNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 3, 3), RenderNode, "Character-Image");
             Image = imageNode.AddUIComponent<Bitmap>();
             m_RightBitmap = System.IO.File.ReadAllLines("./Assets/CharacterRight.txt");
             m_LeftBitmap = System.IO.File.ReadAllLines("./Assets/CharacterLeft.txt");
+
+            StringBuilder tempStr = new StringBuilder(m_RightBitmap[1]);
+            tempStr[1] = (char)('0' + id + 1);
+            m_RightBitmap[1] = tempStr.ToString();
+
+            tempStr = new StringBuilder(m_LeftBitmap[1]);
+            tempStr[1] = (char)('0' + id + 1);
+            m_LeftBitmap[1] = tempStr.ToString();
 
             Image.Load((dir == CharacterDirection.Right) ? m_RightBitmap : m_LeftBitmap);
         }
@@ -85,12 +91,23 @@ namespace Snake
 
         public void Update(float timeStep)
         {
-            //FrameLogger.Log(timeStep.ToString());
+            if (!IsActive)
+            {
+                return;
+            }
+
+            FrameLogger.Log(Id.ToString() + ": " + IsOnGround.ToString());
 
             m_MoveTimer += timeStep;
 
-            // TODO, reset Timer  on ground
-            m_GravityTimer += timeStep;
+            if (IsOnGround)
+            {
+                m_GravityTimer = 0;
+            }
+            else
+            {
+                m_GravityTimer += timeStep;
+            }
 
             Velocity = Vector2Int.Zero;
             if (m_MoveTimer > c_MoveDuration)
@@ -104,13 +121,17 @@ namespace Snake
                 Velocity += new Vector2Int(0, 1);
                 m_GravityTimer = 0;
             }
-            //FrameLogger.Log(Velocity.ToString());
         }
 
         public void SetPosition(Vector2Int position)
         {
             Collider = new RectInt(position, Collider.Size);
             RenderNode.SetPosition(position);
+        }
+
+        protected override void onIsActiveChanged(bool value)
+        {
+            RenderNode.IsActive = value;
         }
     }
 }

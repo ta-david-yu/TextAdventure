@@ -21,13 +21,13 @@ namespace Snake
 
         public SlidingPlatform() { }
 
-        public override void Update(float timeStep)
+        protected override void onUpdate(float timeStep)
         {
             base.Update(timeStep);
 
             if (m_Direction == Direction.Left)
             {
-                foreach (var character in m_Characters)
+                foreach (var character in OnTopCharacters)
                 {
                     // TODO: move character
                 }

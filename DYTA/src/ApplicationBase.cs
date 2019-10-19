@@ -36,7 +36,7 @@ namespace DYTA
 
         private void gameLoop()
         {
-            long minimumStepPerFrame = 12;
+            long minimumStepPerFrame = 20;
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();

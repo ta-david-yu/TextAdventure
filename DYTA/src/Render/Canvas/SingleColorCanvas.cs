@@ -24,11 +24,7 @@ namespace DYTA.Render
             }
         }
 
-        private List<StringBuilder> m_CharacterBuffer;
-
         private Dictionary<Vector2Int, char> m_DrawBuffer;
-
-        private string m_ClearLine;
 
         public SingleColorCanvas()
         {

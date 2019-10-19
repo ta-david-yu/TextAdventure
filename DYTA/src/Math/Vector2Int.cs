@@ -10,6 +10,11 @@ namespace DYTA.Math
         public static Vector2Int Zero { get { return new Vector2Int(0, 0); } }
         public static Vector2Int One { get { return new Vector2Int(1, 1); } }
 
+        public static Vector2Int Right { get { return new Vector2Int(1, 0); } }
+
+        public static Vector2Int Up { get { return new Vector2Int(0, -1); } }
+
+
         public int X { get; set; }
         public int Y { get; set; }
 
@@ -60,6 +65,11 @@ namespace DYTA.Math
             a.X -= b.X;
             a.Y -= b.Y;
             return a;
+        }
+
+        public static Vector2Int operator *(Vector2Int lhs, int rhs)
+        {
+            return new Vector2Int(lhs.X * rhs, lhs.Y * rhs);
         }
 
         public static bool operator ==(Vector2Int lhs, Vector2Int rhs)

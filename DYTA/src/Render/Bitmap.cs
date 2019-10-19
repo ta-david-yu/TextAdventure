@@ -9,7 +9,8 @@ namespace DYTA.Render
         public enum DrawType
         {
             Normal,
-            Sliced
+            Sliced,
+            Tiled
         }
 
         public List<StringBuilder> Data { get; private set; } 
