@@ -44,10 +44,48 @@ namespace NSShaft
         private Vector2Int m_TowerSize;
 
         // Tower movement
+        private int m_Difficulty = 0;
+        public int Difficulty 
+        {
+            get
+            {
+                return m_Difficulty;
+            }
+
+            private set
+            {
+                var prev = value;
+                m_Difficulty = value;
+
+                if (value != prev)
+                {
+                    OnDifficultyChanged.Invoke(value);
+                }
+            }
+        }
+
+        private int m_TotalLevelCounter = 0;
+        public int TotalLevelCounter
+        {
+            get
+            {
+                return m_TotalLevelCounter;
+            }
+
+            private set
+            {
+                var prev = value;
+                m_TotalLevelCounter = value;
+
+                if (value != prev)
+                {
+                    OnTotalLevelChanged.Invoke(value);
+                }
+            }
+        }
+
         private float m_TowerMoveTimer = 0;
         private float m_TowerMoveDuration = c_SlowestTowerMoveDuration;
-        private int m_Difficulty = 0;
-        private int m_TotalLevelCounter = 0;
         private int m_LevelCounter = 0;
 
         private Platform m_PreviousPlatform;
@@ -72,6 +110,10 @@ namespace NSShaft
         private const int c_PlatformOffsetXMax = 20;
 
         private const int c_SpikeSpawnInitialThreshold = 9;
+
+        // event
+        public event Action<int> OnTotalLevelChanged = delegate { };
+        public event Action<int> OnDifficultyChanged = delegate { };
 
         public World2D(int numOfPlayers, RectInt bounds)
         {
@@ -254,12 +296,12 @@ namespace NSShaft
                     }
 
                     m_LevelCounter++;
-                    m_TotalLevelCounter++;
+                    TotalLevelCounter++;
                     if (m_LevelCounter >= 10)
                     {
                         m_LevelCounter = 0;
-                        m_Difficulty++;
-                        if (m_Difficulty < c_MaxDifficulty)
+                        Difficulty++;
+                        if (Difficulty < c_MaxDifficulty)
                         {
                             m_TowerMoveDuration -= c_AddUpPer10Level;
                         }
@@ -267,8 +309,8 @@ namespace NSShaft
                 }
             }
 
-            FrameLogger.Log("Difficulty - " + m_Difficulty);
-            FrameLogger.Log("TotalLevelCounter - " + m_TotalLevelCounter);
+            FrameLogger.Log("Difficulty - " + Difficulty);
+            FrameLogger.Log("TotalLevelCounter - " + TotalLevelCounter);
             FrameLogger.Log("SpikeThreshold - " + m_SpikeSpawnThreshold);
 
             // update platform
@@ -371,6 +413,12 @@ namespace NSShaft
                 if (character.Collider.Position.Y + TowerTopNode.Bounds.Position.Y + 1 > m_TowerSize.Y)
                 {
                     character.AddHealth(-999);
+                    character.IsActive = false;
+                }
+
+                if (character.Collider.Position.Y + TowerTopNode.Bounds.Position.Y <= 0)
+                {
+                    character.IsActive = false;
                 }
 
                 //FrameLogger.Log(velocity + newPos.ToString());
@@ -380,8 +428,8 @@ namespace NSShaft
         private void handleOnPlayerDie(int id)
         {
             //Characters[id].IsActive = false;
-            AudioManager.Instance.BeepMusic(250, 50);
-            AudioManager.Instance.BeepMusic(150, 50);
+            AudioManager.Instance.BeepMusic(250, 100);
+            AudioManager.Instance.BeepMusic(150, 100);
         }
     }
 }

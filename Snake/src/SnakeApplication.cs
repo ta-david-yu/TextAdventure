@@ -16,22 +16,25 @@ namespace NSShaft
             GameOver
         }
 
-        #region UIReference
-
-        private UINode m_PlayGroundNode;
-
-
-        #endregion
-
         #region GameVar
 
         private GameState State { get; set; }
 
         private World2D World { get; set; }
 
+
+
         #endregion
 
-        private static readonly Vector2Int c_PlaygroundSize = new Vector2Int(50, 25);
+        #region GameUI
+
+        private UINode m_PlayGroundNode;
+        private List<TextBox> m_HpTexts;
+        private List<TextBox> m_HpBarTexts;
+
+        #endregion
+
+        private static readonly Vector2Int c_GameWindowSize = new Vector2Int(50, 25);
 
         private static readonly ConsoleKey[,] c_InputTable = new ConsoleKey[,]
         {
@@ -49,15 +52,65 @@ namespace NSShaft
         {
             FrameLogger.Toggle();
 
-            m_PlayGroundNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_PlaygroundSize + Vector2Int.One), null, "Playground-Node");
+            // frame UI
+            m_PlayGroundNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_GameWindowSize + Vector2Int.One), null, "Playground-Node");
             var playgroundCanvas = m_PlayGroundNode.AddUIComponent<SingleColorCanvas>();
             playgroundCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.White);
 
-            var playgroundLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_PlaygroundSize + Vector2Int.One), m_PlayGroundNode, "PlaygroundLayout-Node");
+            var playgroundLayoutNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_GameWindowSize + Vector2Int.One), m_PlayGroundNode, "PlaygroundLayout-Node");
             var layoutBitmap = playgroundLayoutNode.AddUIComponent<Bitmap>();
             layoutBitmap.LoadFromFile("./Assets/Layout.txt", Bitmap.DrawType.Sliced);
 
-            World = new World2D(1, new RectInt(Vector2Int.One, c_PlaygroundSize));
+            // game world
+            World = new World2D(2, new RectInt(Vector2Int.One, c_GameWindowSize));
+
+            // game UI
+            RectInt gameUISize = new RectInt(new Vector2Int(0, c_GameWindowSize.Y + 1), new Vector2Int(c_GameWindowSize.X + 1, 5));
+
+            var uiNode = UINode.Engine.Instance.CreateNode(gameUISize, null, "Game UI");
+            var canvas = uiNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGray, ConsoleColor.White);
+
+            RectInt panelBounds = new RectInt(new Vector2Int(0, 0), new Vector2Int(c_GameWindowSize.X + 1, 5));
+
+            var layoutNode = UINode.Engine.Instance.CreateNode(panelBounds, uiNode, "Game UI");
+            var layout = layoutNode.AddUIComponent<Bitmap>();
+            layout.LoadFromFile("./Assets/Layout-Empty.txt", Bitmap.DrawType.Sliced);
+
+            // register character hp , create hp ui
+            m_HpTexts = new List<TextBox>();
+            m_HpBarTexts = new List<TextBox>();
+            for (int i = 0; i < World.Characters.Count; i++)
+            {
+                var character = World.Characters[i];
+                character.OnHealthChanged += (int health) => handleOnCharacterHpChanged(character.Id, health);
+
+                var textNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1 + i * 2, 10, 1), uiNode, "Game UI");
+                var text = textNode.AddUIComponent<TextBox>();
+                text.text = string.Format("P{0} HP: {1, 2}/{2, 2}", i+1,  10, Character.c_MaxHealth);
+                text.horizontalAlignment = TextBox.HorizontalAlignment.Left;
+                text.verticalAlignment = TextBox.VerticalAlignment.Middle;
+
+                m_HpTexts.Add(text);
+
+                var hpBarCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(14, 1 + i * 2, 20, 1), uiNode, "Game UI");
+                var hpBarCanvas = hpBarCanvasNode.AddUIComponent<SingleColorCanvas>();
+                hpBarCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGreen, ConsoleColor.DarkGreen);
+
+                var hpBarBackNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 20, 1), hpBarCanvasNode, "Game UI - Text");
+                text = hpBarBackNode.AddUIComponent<TextBox>();
+                text.text = new string("                    ");
+
+                var hpBarInsideCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(14, 1 + i * 2, 20, 1), uiNode, "Game UI - Bar");
+                var hpBarInsideCanvas = hpBarInsideCanvasNode.AddUIComponent<SingleColorCanvas>();
+                hpBarInsideCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Yellow, ConsoleColor.Yellow);
+
+                var actualInsideTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 20, 1), hpBarInsideCanvasNode, "Game UI - Bar -Text");
+                text = actualInsideTextNode.AddUIComponent<TextBox>();
+                text.text = new string("                    ");
+
+                m_HpBarTexts.Add(text);
+            }
         }
 
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
@@ -85,6 +138,27 @@ namespace NSShaft
         protected override void update(long timeStep)
         {
             World.Update((float)timeStep / 1000.0f);
+        }
+
+        private void handleOnCharacterHpChanged(int id, int health)
+        {
+            if (health == 0)
+            {
+                m_HpTexts[id].text = string.Format("P{0} DECEASED", id+1, health, Character.c_MaxHealth);
+                m_HpBarTexts[id].text = "";
+            }
+            else
+            {
+                m_HpTexts[id].text = string.Format("P{0} HP[{1, 2}/{2, 2}]", id+1, health, Character.c_MaxHealth);
+                m_HpBarTexts[id].text = new string(' ', health * 2);
+                m_HpBarTexts[id].Node.ParentCanvas.Node.SetSize(new Vector2Int(health * 2, 1));
+                m_HpBarTexts[id].Node.SetSize(new Vector2Int(health * 2, 1));
+            }
+        }
+
+        private void handleOnLevelChanged(int level)
+        {
+
         }
     }
 }

@@ -58,7 +58,7 @@ namespace NSShaft
 
         private const int c_MaxSpeedY = 1;
 
-        private const int c_MaxHealth = 10;
+        public const int c_MaxHealth = 10;
 
         private static readonly ConsoleColor[] c_CharacterColors = new ConsoleColor[]{ ConsoleColor.Yellow, ConsoleColor.Cyan, ConsoleColor.Green, ConsoleColor.DarkCyan };
 
@@ -196,7 +196,7 @@ namespace NSShaft
 
         public void OnStepOnPlatform(Platform plat)
         {
-            AudioManager.Instance.BeepMusic(150 + Health * 40, 50);
+            AudioManager.Instance.BeepMusic(150 + Health * 40, 100);
         }
     }
 }
