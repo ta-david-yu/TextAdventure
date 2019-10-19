@@ -54,7 +54,7 @@ namespace NSShaft
 
             private set
             {
-                var prev = value;
+                var prev = m_Difficulty;
                 m_Difficulty = value;
 
                 if (value != prev)
@@ -74,7 +74,7 @@ namespace NSShaft
 
             private set
             {
-                var prev = value;
+                var prev = m_TotalLevelCounter;
                 m_TotalLevelCounter = value;
 
                 if (value != prev)
@@ -105,9 +105,6 @@ namespace NSShaft
 
         private const int c_PlatformWidth = 16;
         private const int c_PlatformOffsetY = 5;
-
-        private const int c_PlatformOffsetXMin = -20;
-        private const int c_PlatformOffsetXMax = 20;
 
         private const int c_SpikeSpawnInitialThreshold = 9;
 

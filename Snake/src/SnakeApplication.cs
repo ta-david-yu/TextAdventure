@@ -31,6 +31,7 @@ namespace NSShaft
         private UINode m_PlayGroundNode;
         private List<TextBox> m_HpTexts;
         private List<TextBox> m_HpBarTexts;
+        private TextBox m_LevelText;
 
         #endregion
 
@@ -85,7 +86,7 @@ namespace NSShaft
                 var character = World.Characters[i];
                 character.OnHealthChanged += (int health) => handleOnCharacterHpChanged(character.Id, health);
 
-                var textNode = UINode.Engine.Instance.CreateNode(new RectInt(1, 1 + i * 2, 10, 1), uiNode, "Game UI");
+                var textNode = UINode.Engine.Instance.CreateNode(new RectInt(3, 1 + i * 2, 10, 1), uiNode, "Game UI");
                 var text = textNode.AddUIComponent<TextBox>();
                 text.text = string.Format("P{0} HP: {1, 2}/{2, 2}", i+1,  10, Character.c_MaxHealth);
                 text.horizontalAlignment = TextBox.HorizontalAlignment.Left;
@@ -93,7 +94,7 @@ namespace NSShaft
 
                 m_HpTexts.Add(text);
 
-                var hpBarCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(14, 1 + i * 2, 20, 1), uiNode, "Game UI");
+                var hpBarCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(18, 1 + i * 2, 20, 1), uiNode, "Game UI");
                 var hpBarCanvas = hpBarCanvasNode.AddUIComponent<SingleColorCanvas>();
                 hpBarCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkGreen, ConsoleColor.DarkGreen);
 
@@ -101,7 +102,7 @@ namespace NSShaft
                 text = hpBarBackNode.AddUIComponent<TextBox>();
                 text.text = new string("                    ");
 
-                var hpBarInsideCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(14, 1 + i * 2, 20, 1), uiNode, "Game UI - Bar");
+                var hpBarInsideCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(18, 1 + i * 2, 20, 1), uiNode, "Game UI - Bar");
                 var hpBarInsideCanvas = hpBarInsideCanvasNode.AddUIComponent<SingleColorCanvas>();
                 hpBarInsideCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Yellow, ConsoleColor.Yellow);
 
@@ -111,6 +112,16 @@ namespace NSShaft
 
                 m_HpBarTexts.Add(text);
             }
+
+            // add level ui
+            var lvlUINode = UINode.Engine.Instance.CreateNode(new RectInt(39, 1, 10, 3), uiNode);
+            m_LevelText = lvlUINode.AddUIComponent<TextBox>();
+            m_LevelText.text = "LEVEL\n0";
+            m_LevelText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            m_LevelText.verticalAlignment = TextBox.VerticalAlignment.Middle;
+
+            World.OnTotalLevelChanged += handleOnTotalLevelChanged;
+
         }
 
         protected override void handleOnKeyPressed(ConsoleKeyInfo keyInfo)
@@ -156,9 +167,9 @@ namespace NSShaft
             }
         }
 
-        private void handleOnLevelChanged(int level)
+        private void handleOnTotalLevelChanged(int level)
         {
-
+            m_LevelText.text = string.Format("LEVEL\n{0}", level);
         }
     }
 }
