@@ -212,7 +212,7 @@ namespace NSShaft
                 for (int i = 0; i < m_AllPlatforms.Count; i++)
                 {
                     var platform = m_AllPlatforms[i];
-                    if (TowerTopNode.Bounds.Position.Y + platform.Collider.Position.Y < 0)
+                    if (TowerTopNode.Bounds.Position.Y - 1 + platform.Collider.Position.Y < 0)
                     {
                         platform.IsActive = false;
                     }
@@ -304,7 +304,7 @@ namespace NSShaft
                         // static object
                         if (collider is StaticWall || collider is DeathZone)
                         {
-                            var bounds = new RectInt(collider.Collider.Position + new Vector2Int(0, -TowerTopNode.Bounds.Position.Y), collider.Collider.Size);
+                            var bounds = new RectInt(collider.Collider.Position + new Vector2Int(0, -(TowerTopNode.Bounds.Position.Y - 1)), collider.Collider.Size);
                             var col = ClampVelocity2D(character.Collider, bounds, velocity, out velocity);
 
                             if (col.IsTrue)
