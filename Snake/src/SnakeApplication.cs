@@ -8,6 +8,14 @@ using static System.Console;
 
 namespace NSShaft
 {
+
+    public enum GameMode
+    {
+        SinglePlayer,
+        TwoPlayers,
+        PvP
+    }
+
     class SnakeApplication : ApplicationBase
     {
         enum GameState
@@ -17,12 +25,7 @@ namespace NSShaft
             Tutorial
         }
 
-        enum GameMode
-        {
-            Single,
-            TwoPlayers,
-            PvP
-        }
+        private PlayerProgress SaveProgress { get; set; }
 
         private GameState State { get; set; }
 
@@ -73,7 +76,7 @@ namespace NSShaft
                 List<Action> ret = new List<Action>();
                 ret.Add(() =>
                 {
-                    Mode = GameMode.Single;
+                    Mode = GameMode.SinglePlayer;
                     loadScene(enterInGameScene, delegate { });
                 });
                 ret.Add(() =>
@@ -120,7 +123,8 @@ namespace NSShaft
 
         public SnakeApplication(Vector2Int windowSize, PixelColor color) : base(windowSize, color)
         {
-
+            SaveProgress = new PlayerProgress();
+            SaveProgress.Load();
         }
 
         protected override void loadInitialScene()
@@ -243,7 +247,7 @@ namespace NSShaft
             layoutBitmap.LoadFromFile("./Assets/Layout.txt", Bitmap.DrawType.Sliced);
 
             // game world
-            World = new World2D((Mode == GameMode.Single)? 1 : 2, new RectInt(Vector2Int.One, c_GameWindowSize));
+            World = new World2D((Mode == GameMode.SinglePlayer)? 1 : 2, new RectInt(Vector2Int.One, c_GameWindowSize));
 
             // register player dead event
             AliveCounter = new HashSet<int>();
@@ -533,12 +537,14 @@ namespace NSShaft
             AliveCounter.Remove(id);
             switch (Mode)
             {
-                case GameMode.Single:
+                case GameMode.SinglePlayer:
                     if (AliveCounter.Count <= 0)
                     {
                         IsFinished = true;
                         m_GameOverCanvas.Node.IsActive = true;
                         m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\npress enter to leave", World.TotalLevelCounter);
+
+                        SaveProgress.AddRecord(GameMode.SinglePlayer, "HELLO", World.TotalLevelCounter);
                     }
                     break;
                 case GameMode.TwoPlayers:
@@ -547,6 +553,8 @@ namespace NSShaft
                         IsFinished = true;
                         m_GameOverCanvas.Node.IsActive = true;
                         m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\npress enter to leave", World.TotalLevelCounter);
+
+                        SaveProgress.AddRecord(GameMode.TwoPlayers, "HELLO", World.TotalLevelCounter);
                     }
                     break;
                 case GameMode.PvP:

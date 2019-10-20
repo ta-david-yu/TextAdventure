@@ -10,12 +10,6 @@ using static DYTA.Utility.CollisionUtil;
 
 namespace NSShaft
 {
-    public enum GameMode
-    {
-        OnePlayer,
-        TwoPlayer
-    }
-
     public class World2D
     {
         public GameMode Mode { get; private set; }
