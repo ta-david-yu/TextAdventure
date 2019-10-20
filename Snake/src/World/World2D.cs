@@ -21,6 +21,7 @@ namespace NSShaft
 
         private List<Platform> m_AllPlatforms = new List<Platform>();
         private List<Platform> m_NormalPlatforms = new List<Platform>();
+        private List<Platform> m_SlidingPlatforms = new List<Platform>();
         private List<Platform> m_SpikePlatforms = new List<Platform>();
 
         private List<HasCollision> m_AllColliders = new List<HasCollision>();
@@ -147,10 +148,10 @@ namespace NSShaft
 
             // create initial platform
             int initialPlatWidth = 21;
-            int platGap = 6;
+            int platGap = 5;
             for (int i = 0; i < 2; i++)
             {
-                var platformPos = new Vector2Int(i * (platGap + initialPlatWidth), c_PlatformInitialHeight);
+                var platformPos = new Vector2Int(1 + i * (platGap + initialPlatWidth), c_PlatformInitialHeight);
                 var platformSize = new Vector2Int(initialPlatWidth, 1);
                 CreateNormalPlatform(platformPos, platformSize);
             }
@@ -196,6 +197,35 @@ namespace NSShaft
                 platform.Initialize(this, new RectInt(pos, size));
 
                 m_NormalPlatforms.Add(platform);
+                m_AllPlatforms.Add(platform);
+                m_AllColliders.Add(platform);
+            }
+
+            return platform;
+        }
+
+        public Platform CreateSlidingPlatform(Vector2Int pos, Vector2Int size)
+        {
+            Platform platform = null;
+
+            // find inactive platform in the list
+            foreach (var plat in m_SlidingPlatforms)
+            {
+                if (!plat.IsActive)
+                {
+                    platform = plat;
+                    platform.SetPositionAndSize(pos, size);
+                    platform.IsActive = true;
+                    break;
+                }
+            }
+
+            if (platform == null)
+            {
+                platform = new SlidingPlatform();
+                platform.Initialize(this, new RectInt(pos, size));
+
+                m_SlidingPlatforms.Add(platform);
                 m_AllPlatforms.Add(platform);
                 m_AllColliders.Add(platform);
             }
@@ -276,15 +306,27 @@ namespace NSShaft
                     {
                         var pos = m_PreviousPlatform.Collider.Position;
                         pos.Y += c_PlatformOffsetY;
-                        pos.X = m_RandomGenerator.Next(0, m_TowerSize.X - c_PlatformWidth - 1);
+                        pos.X = m_RandomGenerator.Next(1, m_TowerSize.X - c_PlatformWidth - 1);
 
                         int rndToken = m_RandomGenerator.Next(0, 10);
 
                         if (rndToken < m_SpikeSpawnThreshold)
                         {
-                            m_PreviousPlatform = CreateNormalPlatform(pos, new Vector2Int(c_PlatformWidth, 1));
+                            rndToken = m_RandomGenerator.Next(0, 10);
+
                             m_SpikeSpawnThreshold -= 2;
+                            // spawn normal platform
+                            if (rndToken < 6)
+                            {
+                                m_PreviousPlatform = CreateNormalPlatform(pos, new Vector2Int(c_PlatformWidth, 1));
+                            }
+                            // spawn sliding platform
+                            else
+                            {
+                                m_PreviousPlatform = CreateSlidingPlatform(pos, new Vector2Int(c_PlatformWidth, 1));
+                            }
                         }
+                        // spawn spike platform
                         else
                         {
                             m_PreviousPlatform = CreateSpikePlatform(pos, new Vector2Int(c_PlatformWidth, 1));
@@ -314,18 +356,18 @@ namespace NSShaft
             FrameLogger.Log("TotalLevelCounter - " + TotalLevelCounter);
             FrameLogger.Log("SpikeThreshold - " + m_SpikeSpawnThreshold);
 
-            // update platform
-            for (int i = 0; i < m_AllPlatforms.Count; i++)
-            {
-                var platform = m_AllPlatforms[i];
-                platform.Update(timeStep);
-            }
-
             // update character
             for (int i = 0; i < Characters.Count; i++)
             {
                 var character = Characters[i];
                 character.Update(timeStep);
+            }
+
+            // update platform
+            for (int i = 0; i < m_AllPlatforms.Count; i++)
+            {
+                var platform = m_AllPlatforms[i];
+                platform.Update(timeStep);
             }
 
             // update character movement, collision detection

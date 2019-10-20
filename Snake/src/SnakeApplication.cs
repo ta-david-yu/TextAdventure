@@ -246,7 +246,7 @@ namespace NSShaft
                             m_InputText.text = m_InputName.ToString();
                         }
                     }
-                    else
+                    else if (keyInfo.Key != ConsoleKey.RightArrow && keyInfo.Key != ConsoleKey.LeftArrow)
                     {
                         if (m_InputName.Length < 12)
                         {

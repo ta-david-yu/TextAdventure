@@ -14,9 +14,9 @@ namespace NSShaft
         public World2D World { get; protected set; }
 
         //
-        protected UINode RenderNode { get; private set; }
+        protected UINode RenderNode { get; set; }
 
-        public Bitmap Image { get; private set; }
+        public Bitmap Image { get; protected set; }
 
         //
         protected virtual string m_ImgFilePath { get; } = "./Assets/Platform.txt";
@@ -47,7 +47,7 @@ namespace NSShaft
 
         public void Update(float timeStep)
         {
-            if (!IsActive)
+            if (IsActive)
             {
                 onUpdate(timeStep);
             }
