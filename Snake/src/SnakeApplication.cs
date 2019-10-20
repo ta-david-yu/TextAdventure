@@ -67,6 +67,7 @@ namespace NSShaft
 
         private SingleColorCanvas m_GameOverCanvas;
         private TextBox m_GameOverText;
+        private TextBox m_InputText;
 
         #endregion
 
@@ -361,7 +362,7 @@ namespace NSShaft
             // create GAME OVER UI
             var gameOverNode = UINode.Engine.Instance.CreateNode(new RectInt(0, World.TowerTopNode.Bounds.Size.Y / 2, World.TowerTopNode.Bounds.Size.X + 1, 5), null, "GO-CanvasNode");
             m_GameOverCanvas = gameOverNode.AddUIComponent<SingleColorCanvas>();
-            m_GameOverCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Yellow, ConsoleColor.Black);
+            m_GameOverCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkRed, ConsoleColor.Yellow);
 
             var goTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X + 1, 5), gameOverNode, "GO-TextBoxNode");
             var goUnlitBox = goTextNode.AddUIComponent<UnlitBox>();
