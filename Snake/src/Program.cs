@@ -5,8 +5,8 @@ namespace NSShaft
 {
     class Program
     {
-        const int c_Width = 60;
-        const int c_Height = 40;
+        const int c_Width = 70;
+        const int c_Height = 50;
 
         static void Main(string[] args)
         {
@@ -14,11 +14,11 @@ namespace NSShaft
 
             try
             {
-                Console.SetWindowSize(c_Width + 10, c_Height + 15);
+                Console.SetWindowSize(c_Width, c_Height + 20);
             }
             catch
             {
-                Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
+                Console.SetWindowSize(Console.LargestWindowWidth < c_Width? Console.LargestWindowWidth : c_Width, Console.LargestWindowHeight);
             }
 
             var app = new SnakeApplication(new DYTA.Math.Vector2Int(c_Width, c_Height), DYTA.Render.PixelColor.DefaultColor);

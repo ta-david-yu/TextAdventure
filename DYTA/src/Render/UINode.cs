@@ -178,6 +178,7 @@ namespace DYTA.Render
 
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.BackgroundColor = ConsoleColor.Black;
+                Console.SetCursorPosition(RootNode.Bounds.Min.X, RootNode.Bounds.Min.Y);
             }
 
             public void Destruction()

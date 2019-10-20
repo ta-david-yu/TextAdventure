@@ -27,7 +27,7 @@ namespace NSShaft
             {
                 foreach (var character in OnTopCharacters)
                 {
-                    // TODO: move character
+                    // TODO: move character sliding
                 }
             }
             else if (m_Direction == Direction.Right)
