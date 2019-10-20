@@ -9,7 +9,7 @@ namespace NSShaft
 {
     public class PlayerProgress
     {
-        public const string c_SaveFilePath = "lb.sav";
+        public const string c_SaveFilePath = "./lb.sav";
 
         [Serializable]
         public class ScoreData
@@ -65,12 +65,12 @@ namespace NSShaft
             if (mode == GameMode.SinglePlayer)
             {
                 Data.SinglePlayerScores.Add(new Tuple<string, int>(name, level));
-                Data.SinglePlayerScores.OrderBy(tuple => -tuple.Item2);
+                Data.SinglePlayerScores = Data.SinglePlayerScores.OrderBy(tuple => -tuple.Item2).ToList();
             }
             else if (mode == GameMode.TwoPlayers)
             {
                 Data.TwoPlayerScores.Add(new Tuple<string, int>(name, level));
-                Data.TwoPlayerScores.OrderBy(tuple => -tuple.Item2);
+                Data.TwoPlayerScores = Data.TwoPlayerScores.OrderBy(tuple => -tuple.Item2).ToList();
             }
 
             Save();

@@ -22,7 +22,8 @@ namespace NSShaft
         {
             Menu,
             InGame,
-            Tutorial
+            Tutorial,
+            Leaderboard
         }
 
         private PlayerProgress SaveProgress { get; set; }
@@ -95,13 +96,27 @@ namespace NSShaft
                 });
                 ret.Add(() =>
                 {
+                    loadScene(enterLeaderBoard, delegate { });
+                });
+                ret.Add(() =>
+                {
                     IsRunning = false;
                 });
                 return ret;
             }
         }
 
-        private static readonly List<string> c_OptionTexts = new List<string>() { "   1 PLAYER", "   2 PLAYERS COOP", "   2 PLAYERS PVP", "   TUTORIAL", "   EXIT" };
+        private static readonly List<string> c_OptionTexts = new List<string>() { "   1 PLAYER", "   2 PLAYERS COOP", "   2 PLAYERS PVP", "   TUTORIAL", "   LEADERBOARD", "   EXIT" };
+
+
+        private static readonly List<string> c_OptionExplains = new List<string>() { 
+            " - PLAY ALONE", 
+            " - TEAM UP", 
+            " - TOWER BATTLE ROYALE", 
+            " - LEARN THE BASICS", 
+            " - HALL OF FAME", 
+            " - SEE YEA!" };
+
 
         private static readonly Vector2Int c_GameWindowSize = new Vector2Int(50, 25);
 
@@ -208,6 +223,13 @@ namespace NSShaft
                 }
             }
             else if (State == GameState.Tutorial)
+            {
+                if (keyInfo.Key == ConsoleKey.Escape)
+                {
+                    loadScene(enterMainMenu, delegate { });
+                }
+            }
+            else if (State == GameState.Leaderboard)
             {
                 if (keyInfo.Key == ConsoleKey.Escape)
                 {
@@ -374,7 +396,7 @@ namespace NSShaft
             {
                 var text = c_OptionTexts[i];
 
-                var btnNode = UINode.Engine.Instance.CreateNode(new RectInt(32, 11 + i * 2, 20, 1), null, text + "-CanvasNode");
+                var btnNode = UINode.Engine.Instance.CreateNode(new RectInt(23, 11 + i * 2, 20, 1), null, text + "-CanvasNode");
                 canvas = btnNode.AddUIComponent<SingleColorCanvas>();
                 canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkYellow);
 
@@ -462,6 +484,79 @@ namespace NSShaft
             img.LoadFromFile("./Assets/SpikePlatform.txt");
         }
 
+        private void enterLeaderBoard()
+        {
+            State = GameState.Leaderboard;
+
+            // create Hint UI
+            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 27, Console.WindowWidth, 1), null, "Hint-CanvasNode");
+            var canvas = hintNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
+
+            var hintTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, Console.WindowWidth, 1), hintNode, "Hint-TextBoxNode");
+            var hintTextBox = hintTextNode.AddUIComponent<TextBox>();
+            hintTextBox.text = "ESC: main menu";
+            hintTextBox.verticalAlignment = TextBox.VerticalAlignment.Middle;
+            hintTextBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
+
+            int showCount = 5;
+            // single player
+            string singlePlayerBoards = "SINGLE PLAYER LEADERBOARD\n";
+
+            for (int i = 0; i < showCount; i++)
+            {
+                if (i < SaveProgress.Data.SinglePlayerScores.Count)
+                {
+                    var tuple = SaveProgress.Data.SinglePlayerScores[i];
+                    string line = string.Format("{0} -   {1, -12}  {2:D8}", i + 1, tuple.Item1, tuple.Item2);
+                    singlePlayerBoards += "\n" + line;
+                }
+                else
+                {
+                    string line = string.Format("{0} -   {1, -12}  {2:D8}", i + 1, "empty", 0);
+                    singlePlayerBoards += "\n" + line;
+                }
+            }
+
+            var boardTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 5, Console.WindowWidth, 30), null, "TutorialNode");
+            canvas = boardTextNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+
+            var textBox = boardTextNode.AddUIComponent<TextBox>();
+            textBox.text = singlePlayerBoards;
+            textBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            textBox.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+
+            // single player
+            string twoPlayerBoards = "TWO PLAYERs LEADERBOARD\n";
+
+            for (int i = 0; i < showCount; i++)
+            {
+                if (i < SaveProgress.Data.TwoPlayerScores.Count)
+                {
+                    var tuple = SaveProgress.Data.TwoPlayerScores[i];
+                    string line = string.Format("{0} -   {1, -12}  {2:D8}", i + 1, tuple.Item1, tuple.Item2);
+                    twoPlayerBoards += "\n" + line;
+                }
+                else
+                {
+                    string line = string.Format("{0} -   {1, -12}  {2:D8}", i + 1, "empty", 0);
+                    twoPlayerBoards += "\n" + line;
+                }
+            }
+
+            boardTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 15, Console.WindowWidth, 30), null, "TutorialNode");
+            canvas = boardTextNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+
+            textBox = boardTextNode.AddUIComponent<TextBox>();
+            textBox.text = twoPlayerBoards;
+            textBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            textBox.verticalAlignment = TextBox.VerticalAlignment.Top;
+        }
+
         #region MainMenu handler
         private void selectOption(int index)
         {
@@ -475,7 +570,7 @@ namespace NSShaft
                     var text = new StringBuilder(c_OptionTexts[i]);
                     text[0] = '-';
                     text[1] = '>';
-                    textBox.text = text.ToString();
+                    textBox.text = text.ToString() + c_OptionExplains[i];
 
                     (textBox.Node.ParentCanvas as SingleColorCanvas).CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
                 }
