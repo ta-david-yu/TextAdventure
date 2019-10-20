@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using DYTA;
+using DYTA.Audio;
 using DYTA.Math;
 using DYTA.Render;
 using static System.Console;
@@ -13,7 +14,8 @@ namespace NSShaft
     {
         SinglePlayer,
         TwoPlayers,
-        PvP
+        PvP,
+        Demo
     }
 
     class SnakeApplication : ApplicationBase
@@ -67,7 +69,11 @@ namespace NSShaft
 
         private SingleColorCanvas m_GameOverCanvas;
         private TextBox m_GameOverText;
+
+        private UINode m_InputFieldCanvasNode;
         private TextBox m_InputText;
+
+        private StringBuilder m_InputName = new StringBuilder("NOBODY");
 
         #endregion
 
@@ -210,22 +216,58 @@ namespace NSShaft
                 {
                     loadScene(enterMainMenu, delegate { });
                 }
-                else if (keyInfo.Key == ConsoleKey.Enter)
+
+                if (IsFinished)
                 {
-                    if (IsFinished)
+                    if (keyInfo.Key == ConsoleKey.Enter)
                     {
+                        if (m_InputName.Length <= 0)
+                        {
+                            m_InputName = new StringBuilder("SOMEONE");
+                        }
+
+                        switch (Mode)
+                        {
+                            case GameMode.SinglePlayer:
+                                    SaveProgress.AddRecord(GameMode.SinglePlayer, m_InputName.ToString(), World.TotalLevelCounter);
+                                break;
+                            case GameMode.TwoPlayers:
+                                    SaveProgress.AddRecord(GameMode.TwoPlayers, m_InputName.ToString(), World.TotalLevelCounter);
+                                break;
+                        }
                         loadScene(enterMainMenu, delegate { });
                     }
-                }
-                else if (keyInfo.Key == ConsoleKey.F2)
-                {
-                    if (IsPaused)
+                    else if (keyInfo.Key == ConsoleKey.Backspace)
                     {
-                        Resume();
+                        if (m_InputName.Length > 0)
+                        {
+                            m_InputName.Length--;
+                            AudioManager.Instance.BeepMusic(80, 20);
+                            m_InputText.text = m_InputName.ToString();
+                        }
                     }
                     else
                     {
-                        Pause();
+                        if (m_InputName.Length < 12)
+                        {
+                            m_InputName.Append(keyInfo.KeyChar);
+                            AudioManager.Instance.BeepMusic(150, 20);
+                            m_InputText.text = m_InputName.ToString();
+                        }
+                    }
+                }
+                else
+                {
+                    if (keyInfo.Key == ConsoleKey.F2)
+                    {
+                        if (IsPaused)
+                        {
+                            Resume();
+                        }
+                        else
+                        {
+                            Pause();
+                        }
                     }
                 }
             }
@@ -269,6 +311,7 @@ namespace NSShaft
             State = GameState.InGame;
             IsFinished = false;
             IsPaused = false;
+            m_InputName = new StringBuilder("");
 
             // frame UI
             m_PlayGroundNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_GameWindowSize + Vector2Int.One), null, "Playground-Node");
@@ -364,15 +407,31 @@ namespace NSShaft
             m_GameOverCanvas = gameOverNode.AddUIComponent<SingleColorCanvas>();
             m_GameOverCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkRed, ConsoleColor.Yellow);
 
-            var goTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X + 1, 5), gameOverNode, "GO-TextBoxNode");
-            var goUnlitBox = goTextNode.AddUIComponent<UnlitBox>();
+            var goUnlitBoardNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X + 1, 5), gameOverNode, "GO-UnlitNode");
+            var goUnlitBox = goUnlitBoardNode.AddUIComponent<UnlitBox>();
             goUnlitBox.UnlitCharacter = ' ';
+
+            var goTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X + 1, 5), gameOverNode, "GO-TextBoxNode");
             m_GameOverText = goTextNode.AddUIComponent<TextBox>();
-            m_GameOverText.text = "GAME OVER\n\npress enter to leave";
-            m_GameOverText.verticalAlignment = TextBox.VerticalAlignment.Middle;
+            m_GameOverText.text = "GAME OVER\n\n\npress enter to confirm";
+            m_GameOverText.verticalAlignment = TextBox.VerticalAlignment.Top;
             m_GameOverText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
 
+            m_InputFieldCanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 2, World.TowerTopNode.Bounds.Size.X + 1, 1), gameOverNode, "InputCanvasNode");
+            canvas = m_InputFieldCanvasNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Red, ConsoleColor.Yellow);
+
+            var inputUnlitBoxNode = UINode.Engine.Instance.CreateNode(new RectInt(13, 0, 24, 1), m_InputFieldCanvasNode, "InputNode");
+            inputUnlitBoxNode.AddUIComponent<UnlitBox>().UnlitCharacter = ' ';
+
+            var inputTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X + 1, 1), inputUnlitBoxNode, "InputNode");
+            m_InputText = inputTextNode.AddUIComponent<TextBox>();
+            m_InputText.text = "PLEASE INPUT YOUR NAME";
+            m_InputText.verticalAlignment = TextBox.VerticalAlignment.Middle;
+            m_InputText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
             gameOverNode.IsActive = false;
+            m_InputFieldCanvasNode.IsActive = false;
 
             // Setup bg settings
             World.BackgroundImageNode.IsActive = !m_OptimizedMode;
@@ -498,9 +557,10 @@ namespace NSShaft
         private void enterLeaderBoard()
         {
             State = GameState.Leaderboard;
+            Mode = GameMode.Demo;
 
             // game world
-            World = new World2D((Mode == GameMode.SinglePlayer) ? 1 : 2, new RectInt(Vector2Int.One, c_GameWindowSize));
+            World = new World2D(0, new RectInt(Vector2Int.One, c_GameWindowSize));
             m_LeaderBoardUINode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 1));
 
             // create Hint UI
@@ -661,7 +721,8 @@ namespace NSShaft
                     {
                         IsFinished = true;
                         m_GameOverCanvas.Node.IsActive = true;
-                        m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\npress enter to leave", World.TotalLevelCounter);
+                        m_InputFieldCanvasNode.IsActive = true;
+                        m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\n\npress enter to confirm", World.TotalLevelCounter);
 
                         SaveProgress.AddRecord(GameMode.SinglePlayer, "HELLO", World.TotalLevelCounter);
                     }
@@ -671,7 +732,8 @@ namespace NSShaft
                     {
                         IsFinished = true;
                         m_GameOverCanvas.Node.IsActive = true;
-                        m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\npress enter to leave", World.TotalLevelCounter);
+                        m_InputFieldCanvasNode.IsActive = true;
+                        m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\n\npress enter to confirm", World.TotalLevelCounter);
 
                         SaveProgress.AddRecord(GameMode.TwoPlayers, "HELLO", World.TotalLevelCounter);
                     }
