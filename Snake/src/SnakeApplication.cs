@@ -4,6 +4,7 @@ using System.Text;
 using DYTA;
 using DYTA.Math;
 using DYTA.Render;
+using static System.Console;
 
 namespace NSShaft
 {
@@ -97,9 +98,18 @@ namespace NSShaft
             }
         }
 
-        private static readonly List<string> c_OptionTexts = new List<string>() { "   1 PLAYER", "   2 PLAYERS", "   2 PLAYERS PVP", "   TUTORIAL", "   EXIT" };
+        private static readonly List<string> c_OptionTexts = new List<string>() { "   1 PLAYER", "   2 PLAYERS COOP", "   2 PLAYERS PVP", "   TUTORIAL", "   EXIT" };
 
         private static readonly Vector2Int c_GameWindowSize = new Vector2Int(50, 25);
+
+        private static readonly List<string> c_TutorialLines = 
+            new List<string>() {
+                "In NS-Shaft Console Edition, \nCharacters move left/right automatically,\nP1 uses left/right keys, P2 uses A/D to change direction.",
+                "Your character's hp will drop to zero instantly \nwhen he falls out of the screen \nor collides with the spikes in red on the top",
+                "Besides that, your character will lose 3 hp \nwhen he steps on to a trap platform in red",
+                "1 hp is restored every time \nthe character steps on a platform that is not a trap platform",
+                "There are also other kinds of platforms, \nexplore them yourself in the game!",
+            };
 
         private static readonly ConsoleKey[,] c_InputTable = new ConsoleKey[,]
         {
@@ -195,7 +205,10 @@ namespace NSShaft
             }
             else if (State == GameState.Tutorial)
             {
-
+                if (keyInfo.Key == ConsoleKey.Escape)
+                {
+                    loadScene(enterMainMenu, delegate { });
+                }
             }
         }
 
@@ -384,7 +397,65 @@ namespace NSShaft
 
         private void enterTutorial()
         {
+            State = GameState.Tutorial;
 
+            // create Hint UI
+            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 27, Console.WindowWidth, 1), null, "Hint-CanvasNode");
+            var canvas = hintNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
+
+            var hintTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, Console.WindowWidth, 1), hintNode, "Hint-TextBoxNode");
+            var hintTextBox = hintTextNode.AddUIComponent<TextBox>();
+            hintTextBox.text = "ESC: main menu";
+            hintTextBox.verticalAlignment = TextBox.VerticalAlignment.Middle;
+            hintTextBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
+            string tutorialText = "";
+            foreach (var txt in c_TutorialLines)
+            {
+                tutorialText += txt + "\n\n\n\n";
+            }
+
+            var tutorialNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 2, Console.WindowWidth, 30), null, "TutorialNode");
+            var textBox = tutorialNode.AddUIComponent<TextBox>();
+            textBox.text = tutorialText;
+            textBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+            textBox.verticalAlignment = TextBox.VerticalAlignment.Top;
+
+            // draw characters
+            var chNode = UINode.Engine.Instance.CreateNode(new RectInt(Console.WindowWidth / 2 - 9, 5, Console.WindowWidth, 2), null, "CHNNODE");
+            canvas = chNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, Character.c_CharacterColors[0]);
+
+            var chImgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, Console.WindowWidth, 2), chNode, "CHNNODE-IMG");
+            var img = chImgNode.AddUIComponent<Bitmap>();
+            img.LoadFromFile("./Assets/P1-Control.txt");
+
+            chNode = UINode.Engine.Instance.CreateNode(new RectInt(Console.WindowWidth / 2 + 5, 5, Console.WindowWidth, 2), null, "CHNNODE");
+            canvas = chNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, Character.c_CharacterColors[1]);
+
+            chImgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, Console.WindowWidth, 2), chNode, "CHNNODE-IMG");
+            img = chImgNode.AddUIComponent<Bitmap>();
+            img.LoadFromFile("./Assets/P2-Control.txt");
+
+            // draw spikes
+            chNode = UINode.Engine.Instance.CreateNode(new RectInt(Console.WindowWidth / 2 - 9, 12, Console.WindowWidth, 2), null, "SPIKENODE");
+            canvas = chNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Red);
+
+            chImgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 16, 1), chNode, "CHNNODE-IMG");
+            img = chImgNode.AddUIComponent<Bitmap>();
+            img.LoadFromFile("./Assets/DeathZone.txt");
+
+            // draw trap platform
+            chNode = UINode.Engine.Instance.CreateNode(new RectInt(Console.WindowWidth / 2 - 8, 17, Console.WindowWidth, 2), null, "SPIKENODE");
+            canvas = chNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Red);
+
+            chImgNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 14, 1), chNode, "CHNNODE-IMG");
+            img = chImgNode.AddUIComponent<Bitmap>();
+            img.LoadFromFile("./Assets/SpikePlatform.txt");
         }
 
         #region MainMenu handler

@@ -142,7 +142,7 @@ namespace NSShaft
 
             // create character
             int offset = bounds.Width / 3;
-            for (int i = numOfPlayers - 1; i >= 0; i--)
+            for (int i = 0; i < numOfPlayers; i++)
             {
                 var character = CreateCharacter(new Vector2Int(offset * (i + 1),
                     c_PlayerInitialHeight),
