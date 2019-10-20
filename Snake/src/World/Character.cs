@@ -60,7 +60,7 @@ namespace NSShaft
 
         public const int c_MaxHealth = 10;
 
-        private static readonly ConsoleColor[] c_CharacterColors = new ConsoleColor[]{ ConsoleColor.Yellow, ConsoleColor.Cyan, ConsoleColor.Green, ConsoleColor.DarkCyan };
+        public static readonly ConsoleColor[] c_CharacterColors = new ConsoleColor[]{ ConsoleColor.Yellow, ConsoleColor.Cyan, ConsoleColor.Green, ConsoleColor.DarkCyan };
 
         public Character() { }
 

@@ -24,7 +24,7 @@ namespace NSShaft
         }
 
         private GameState State { get; set; }
-        private GameMode Mode { get; set; }
+
         private bool m_OptimizedMode = false;
 
         #region MenuVar
@@ -41,7 +41,15 @@ namespace NSShaft
 
         #region InGameVar
 
+        private GameMode Mode { get; set; }
+
         private World2D World { get; set; }
+
+        private HashSet<int> AliveCounter = new HashSet<int>();
+
+        private bool IsFinished { get; set; } = false;
+
+        private bool IsPaused { get; set; } = false;
 
         #endregion
 
@@ -51,6 +59,9 @@ namespace NSShaft
         private List<TextBox> m_HpTexts;
         private List<TextBox> m_HpBarTexts;
         private TextBox m_LevelText;
+
+        private SingleColorCanvas m_GameOverCanvas;
+        private TextBox m_GameOverText;
 
         #endregion
 
@@ -163,6 +174,24 @@ namespace NSShaft
                 {
                     loadScene(enterMainMenu, delegate { });
                 }
+                else if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    if (IsFinished)
+                    {
+                        loadScene(enterMainMenu, delegate { });
+                    }
+                }
+                else if (keyInfo.Key == ConsoleKey.F2)
+                {
+                    if (IsPaused)
+                    {
+                        Resume();
+                    }
+                    else
+                    {
+                        Pause();
+                    }
+                }
             }
             else if (State == GameState.Tutorial)
             {
@@ -178,13 +207,18 @@ namespace NSShaft
             }
             else if (State == GameState.InGame)
             {
-                World.Update((float)timeStep / 1000.0f);
+                if (!IsFinished && !IsPaused)
+                {
+                    World.Update((float)timeStep / 1000.0f);
+                }
             }
         }
 
         private void enterInGameScene()
         {
             State = GameState.InGame;
+            IsFinished = false;
+            IsPaused = false;
 
             // frame UI
             m_PlayGroundNode = UINode.Engine.Instance.CreateNode(new RectInt(Vector2Int.Zero, c_GameWindowSize + Vector2Int.One), null, "Playground-Node");
@@ -197,6 +231,15 @@ namespace NSShaft
 
             // game world
             World = new World2D((Mode == GameMode.Single)? 1 : 2, new RectInt(Vector2Int.One, c_GameWindowSize));
+
+            // register player dead event
+            AliveCounter = new HashSet<int>();
+            foreach (var character in World.Characters)
+            {
+                int id = character.Id;
+                AliveCounter.Add(id);
+                character.OnDie += () => handleOnPlayerDie(id);
+            }
 
             // game UI
             RectInt gameUISize = new RectInt(new Vector2Int(0, c_GameWindowSize.Y + 1), new Vector2Int(c_GameWindowSize.X + 1, 5));
@@ -249,22 +292,37 @@ namespace NSShaft
             // add level ui
             var lvlUINode = UINode.Engine.Instance.CreateNode(new RectInt(39, 1, 10, 3), uiNode);
             m_LevelText = lvlUINode.AddUIComponent<TextBox>();
-            m_LevelText.text = "LEVEL\n0";
+            m_LevelText.text = "LEVEL\n000";
             m_LevelText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             m_LevelText.verticalAlignment = TextBox.VerticalAlignment.Middle;
 
             World.OnTotalLevelChanged += handleOnTotalLevelChanged;
 
             // create Hint UI
-            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(0, World.TowerTopNode.Bounds.Size.Y + 6, World.TowerTopNode.Bounds.Size.X, 1), null, "Hint-CanvasNode");
+            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(0, World.TowerTopNode.Bounds.Size.Y + 7, World.TowerTopNode.Bounds.Size.X, 1), null, "Hint-CanvasNode");
             canvas = hintNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
 
             var hintTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X, 1), hintNode, "Hint-TextBoxNode");
             var hintTextBox = hintTextNode.AddUIComponent<TextBox>();
-            hintTextBox.text = "F1: turn on/off optimized mode in game";
+            hintTextBox.text = "F1: turn on/off optimized mode in game\nF2: pause/resume game";
             hintTextBox.verticalAlignment = TextBox.VerticalAlignment.Middle;
             hintTextBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
+            // create GAME OVER UI
+            var gameOverNode = UINode.Engine.Instance.CreateNode(new RectInt(0, World.TowerTopNode.Bounds.Size.Y / 2, World.TowerTopNode.Bounds.Size.X + 1, 5), null, "GO-CanvasNode");
+            m_GameOverCanvas = gameOverNode.AddUIComponent<SingleColorCanvas>();
+            m_GameOverCanvas.CanvasPixelColor = new PixelColor(ConsoleColor.Yellow, ConsoleColor.Black);
+
+            var goTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, World.TowerTopNode.Bounds.Size.X + 1, 5), gameOverNode, "GO-TextBoxNode");
+            var goUnlitBox = goTextNode.AddUIComponent<UnlitBox>();
+            goUnlitBox.UnlitCharacter = ' ';
+            m_GameOverText = goTextNode.AddUIComponent<TextBox>();
+            m_GameOverText.text = "GAME OVER\n\npress enter to leave";
+            m_GameOverText.verticalAlignment = TextBox.VerticalAlignment.Middle;
+            m_GameOverText.horizontalAlignment = TextBox.HorizontalAlignment.Center;
+
+            gameOverNode.IsActive = false;
 
             // Setup bg settings
             World.BackgroundImageNode.IsActive = !m_OptimizedMode;
@@ -365,6 +423,19 @@ namespace NSShaft
 
         #region InGame handler
 
+        private void Pause()
+        {
+            IsPaused = true;
+            m_GameOverCanvas.Node.IsActive = true;
+            m_GameOverText.text = string.Format("GAME PAUSED\n\npress F2 to resume");
+        }
+
+        private void Resume()
+        {
+            IsPaused = false;
+            m_GameOverCanvas.Node.IsActive = false;
+        }
+
         private void handleOnCharacterHpChanged(int id, int health)
         {
             if (health == 0)
@@ -383,7 +454,46 @@ namespace NSShaft
 
         private void handleOnTotalLevelChanged(int level)
         {
-            m_LevelText.text = string.Format("LEVEL\n{0}", level);
+            m_LevelText.text = string.Format("LEVEL\n{0:D3}", level);
+        }
+
+        private void handleOnPlayerDie(int id)
+        {
+            AliveCounter.Remove(id);
+            switch (Mode)
+            {
+                case GameMode.Single:
+                    if (AliveCounter.Count <= 0)
+                    {
+                        IsFinished = true;
+                        m_GameOverCanvas.Node.IsActive = true;
+                        m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\npress enter to leave", World.TotalLevelCounter);
+                    }
+                    break;
+                case GameMode.TwoPlayers:
+                    if (AliveCounter.Count <= 0)
+                    {
+                        IsFinished = true;
+                        m_GameOverCanvas.Node.IsActive = true;
+                        m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\npress enter to leave", World.TotalLevelCounter);
+                    }
+                    break;
+                case GameMode.PvP:
+                    if (AliveCounter.Count == 1)
+                    {
+                        int winnerId = -1;
+                        foreach (var lastId in AliveCounter)
+                        {
+                            winnerId = lastId;
+                        }
+
+                        IsFinished = true;
+                        m_GameOverCanvas.Node.IsActive = true;
+                        m_GameOverCanvas.CanvasPixelColor = new PixelColor(Character.c_CharacterColors[winnerId], ConsoleColor.Black);
+                        m_GameOverText.text = string.Format("GAME OVER - WINNER: PLAYER {0}\n\npress enter to leave", winnerId + 1);
+                    }
+                    break;
+            }
         }
 
         #endregion
