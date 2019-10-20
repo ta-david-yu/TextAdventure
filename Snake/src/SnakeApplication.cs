@@ -70,6 +70,12 @@ namespace NSShaft
 
         #endregion
 
+        #region LeaderBoardUI
+
+        private UINode m_LeaderBoardUINode;
+
+        #endregion
+
         private List<Action> c_OptionDelegates
         {
             get
@@ -250,6 +256,10 @@ namespace NSShaft
                 {
                     World.Update((float)timeStep / 1000.0f);
                 }
+            }
+            else if (State == GameState.Leaderboard)
+            {
+                World.Update((float)timeStep / 1000.0f);
             }
         }
 
@@ -488,6 +498,10 @@ namespace NSShaft
         {
             State = GameState.Leaderboard;
 
+            // game world
+            World = new World2D((Mode == GameMode.SinglePlayer) ? 1 : 2, new RectInt(Vector2Int.One, c_GameWindowSize));
+            m_LeaderBoardUINode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 1));
+
             // create Hint UI
             var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 27, Console.WindowWidth, 1), null, "Hint-CanvasNode");
             var canvas = hintNode.AddUIComponent<SingleColorCanvas>();
@@ -501,8 +515,11 @@ namespace NSShaft
 
 
             int showCount = 5;
+            int boardX = 10;
+            int boardWidth = World.TowerTopNode.Bounds.Width - 20;
+            
             // single player
-            string singlePlayerBoards = "SINGLE PLAYER LEADERBOARD\n";
+            string singlePlayerBoards = "SINGLE PLAYER\n";
 
             for (int i = 0; i < showCount; i++)
             {
@@ -519,18 +536,21 @@ namespace NSShaft
                 }
             }
 
-            var boardTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 5, Console.WindowWidth, 30), null, "TutorialNode");
-            canvas = boardTextNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+            var boardcanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(boardX, 4, boardWidth, 7), m_LeaderBoardUINode, "TutorialNode");
+            canvas = boardcanvasNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkRed, ConsoleColor.Yellow);
 
-            var textBox = boardTextNode.AddUIComponent<TextBox>();
+            var textNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, boardWidth, 7), boardcanvasNode, "TutorialNode");
+            var unlitBg = textNode.AddUIComponent<UnlitBox>();
+            unlitBg.UnlitCharacter = ' ';
+            var textBox = textNode.AddUIComponent<TextBox>();
             textBox.text = singlePlayerBoards;
             textBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             textBox.verticalAlignment = TextBox.VerticalAlignment.Top;
 
 
             // single player
-            string twoPlayerBoards = "TWO PLAYERs LEADERBOARD\n";
+            string twoPlayerBoards = "TWO PLAYERS COOP\n";
 
             for (int i = 0; i < showCount; i++)
             {
@@ -547,11 +567,14 @@ namespace NSShaft
                 }
             }
 
-            boardTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 15, Console.WindowWidth, 30), null, "TutorialNode");
-            canvas = boardTextNode.AddUIComponent<SingleColorCanvas>();
-            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.Yellow);
+            boardcanvasNode = UINode.Engine.Instance.CreateNode(new RectInt(boardX, 14, boardWidth, 7), m_LeaderBoardUINode, "TutorialNode");
+            canvas = boardcanvasNode.AddUIComponent<SingleColorCanvas>();
+            canvas.CanvasPixelColor = new PixelColor(ConsoleColor.DarkRed, ConsoleColor.Yellow);
 
-            textBox = boardTextNode.AddUIComponent<TextBox>();
+            textNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, boardWidth, 7), boardcanvasNode, "TutorialNode");
+            unlitBg = textNode.AddUIComponent<UnlitBox>();
+            unlitBg.UnlitCharacter = ' ';
+            textBox = textNode.AddUIComponent<TextBox>();
             textBox.text = twoPlayerBoards;
             textBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             textBox.verticalAlignment = TextBox.VerticalAlignment.Top;
