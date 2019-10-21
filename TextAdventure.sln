@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DYTATests", "DYTATests\DYTATests.csproj", "{7C702861-6765-48C7-B419-22CECFF2084A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snake", "Snake\Snake.csproj", "{3627E704-E458-457C-8EB8-4166E72DFD25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSShaft", "NSShaft\NSShaft.csproj", "{DAAE3821-F05F-4D8A-AC8C-5F925D6E4093}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{7C702861-6765-48C7-B419-22CECFF2084A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C702861-6765-48C7-B419-22CECFF2084A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C702861-6765-48C7-B419-22CECFF2084A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3627E704-E458-457C-8EB8-4166E72DFD25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3627E704-E458-457C-8EB8-4166E72DFD25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3627E704-E458-457C-8EB8-4166E72DFD25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3627E704-E458-457C-8EB8-4166E72DFD25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAAE3821-F05F-4D8A-AC8C-5F925D6E4093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAAE3821-F05F-4D8A-AC8C-5F925D6E4093}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAAE3821-F05F-4D8A-AC8C-5F925D6E4093}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAAE3821-F05F-4D8A-AC8C-5F925D6E4093}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
