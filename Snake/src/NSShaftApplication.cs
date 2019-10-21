@@ -18,7 +18,7 @@ namespace NSShaft
         Demo
     }
 
-    class SnakeApplication : ApplicationBase
+    class NSShaftApplication : ApplicationBase
     {
         enum GameState
         {
@@ -109,7 +109,7 @@ namespace NSShaft
                 });
                 ret.Add(() =>
                 {
-                    loadScene(enterLeaderBoard, delegate { });
+                    loadScene(enterLeaderBoard, exitLeaderBoard);
                 });
                 ret.Add(() =>
                 {
@@ -149,7 +149,7 @@ namespace NSShaft
             { ConsoleKey.NumPad6, ConsoleKey.NumPad4 }
         };
 
-        public SnakeApplication(Vector2Int windowSize, PixelColor color) : base(windowSize, color)
+        public NSShaftApplication(Vector2Int windowSize, PixelColor color) : base(windowSize, color)
         {
             SaveProgress = new PlayerProgress();
             SaveProgress.Load();
@@ -556,6 +556,9 @@ namespace NSShaft
 
         private void enterLeaderBoard()
         {
+            for (int i = 0; i < 20; i++)
+                playThemeSong();
+
             State = GameState.Leaderboard;
             Mode = GameMode.Demo;
 
@@ -563,12 +566,15 @@ namespace NSShaft
             World = new World2D(0, new RectInt(Vector2Int.One, c_GameWindowSize));
             m_LeaderBoardUINode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, 1, 1));
 
+            int boardX = 10;
+            int boardWidth = World.TowerTopNode.Bounds.Width - 20;
+
             // create Hint UI
-            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 27, Console.WindowWidth, 1), null, "Hint-CanvasNode");
+            var hintNode = UINode.Engine.Instance.CreateNode(new RectInt(boardX, 27, boardWidth, 1), null, "Hint-CanvasNode");
             var canvas = hintNode.AddUIComponent<SingleColorCanvas>();
             canvas.CanvasPixelColor = new PixelColor(ConsoleColor.Black, ConsoleColor.DarkGray);
 
-            var hintTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, Console.WindowWidth, 1), hintNode, "Hint-TextBoxNode");
+            var hintTextNode = UINode.Engine.Instance.CreateNode(new RectInt(0, 0, boardWidth, 1), hintNode, "Hint-TextBoxNode");
             var hintTextBox = hintTextNode.AddUIComponent<TextBox>();
             hintTextBox.text = "ESC: main menu";
             hintTextBox.verticalAlignment = TextBox.VerticalAlignment.Middle;
@@ -576,8 +582,6 @@ namespace NSShaft
 
 
             int showCount = 5;
-            int boardX = 10;
-            int boardWidth = World.TowerTopNode.Bounds.Width - 20;
             
             // single player
             string singlePlayerBoards = "SINGLE PLAYER\n";
@@ -639,6 +643,50 @@ namespace NSShaft
             textBox.text = twoPlayerBoards;
             textBox.horizontalAlignment = TextBox.HorizontalAlignment.Center;
             textBox.verticalAlignment = TextBox.VerticalAlignment.Top;
+        }
+
+        private void exitLeaderBoard()
+        {
+        }
+
+        private void playThemeSong()
+        {
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.Re, 400);
+
+            AudioManager.Instance.DelayMusic(200);
+            //
+            AudioManager.Instance.PlayNote(Note.LaL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.LaL, 200);
+            AudioManager.Instance.PlayNote(Note.SoL, 200);
+            AudioManager.Instance.PlayNote(Note.LaL, 200);
+            AudioManager.Instance.PlayNote(Note.Do, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+
+            AudioManager.Instance.DelayMusic(200);
+            //
+            AudioManager.Instance.PlayNote(Note.LaL, 400);
+            AudioManager.Instance.PlayNote(Note.LaL, 400);
+            AudioManager.Instance.PlayNote(Note.LaL, 200);
+            AudioManager.Instance.PlayNote(Note.SoL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 400);
+
+            AudioManager.Instance.DelayMusic(200);
+            //
+            AudioManager.Instance.PlayNote(Note.SoL, 400);
+            AudioManager.Instance.PlayNote(Note.SoL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.LaL, 200);
+            AudioManager.Instance.PlayNote(Note.SiL, 200);
+            AudioManager.Instance.PlayNote(Note.LaL, 400);
+
+            AudioManager.Instance.DelayMusic(200);
         }
 
         #region MainMenu handler
@@ -723,8 +771,6 @@ namespace NSShaft
                         m_GameOverCanvas.Node.IsActive = true;
                         m_InputFieldCanvasNode.IsActive = true;
                         m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\n\npress enter to confirm", World.TotalLevelCounter);
-
-                        SaveProgress.AddRecord(GameMode.SinglePlayer, "HELLO", World.TotalLevelCounter);
                     }
                     break;
                 case GameMode.TwoPlayers:
@@ -734,8 +780,6 @@ namespace NSShaft
                         m_GameOverCanvas.Node.IsActive = true;
                         m_InputFieldCanvasNode.IsActive = true;
                         m_GameOverText.text = string.Format("GAME OVER - SCORE: {0:D3}\n\n\npress enter to confirm", World.TotalLevelCounter);
-
-                        SaveProgress.AddRecord(GameMode.TwoPlayers, "HELLO", World.TotalLevelCounter);
                     }
                     break;
                 case GameMode.PvP:

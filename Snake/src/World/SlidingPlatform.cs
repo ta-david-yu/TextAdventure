@@ -51,7 +51,6 @@ namespace NSShaft
 
                     if (timer > c_PlatformMoveDuration)
                     {
-                        FrameLogger.LogError("MOVE LEFT");
                         OnTopCharacters[pair.Key].Velocity += Vector2Int.Right * -1;
                         timer = 0;
                     }
@@ -67,7 +66,6 @@ namespace NSShaft
 
                     if (timer > c_PlatformMoveDuration)
                     {
-                        FrameLogger.LogError("MOVE RIGHT");
                         OnTopCharacters[pair.Key].Velocity += Vector2Int.Right * 1;
                         timer = 0;
                     }

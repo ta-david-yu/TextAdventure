@@ -21,7 +21,7 @@ namespace NSShaft
                 Console.SetWindowSize(Console.LargestWindowWidth < c_Width? Console.LargestWindowWidth : c_Width, Console.LargestWindowHeight);
             }
 
-            var app = new SnakeApplication(new DYTA.Math.Vector2Int(c_Width, c_Height), DYTA.Render.PixelColor.DefaultColor);
+            var app = new NSShaftApplication(new DYTA.Math.Vector2Int(c_Width, c_Height), DYTA.Render.PixelColor.DefaultColor);
 
             app.Run();
 
